@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mitra Karyawan - Dana Tunai</title>
+<meta name="description" content="Simulasi angsuran dana tunai motor: pilih unit, atur pinjaman, pilih tenor.">
+<meta name="theme-color" content="#059669">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mitra Karyawan">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --field: #f8fafc;
+    --green: #059669;
+    --green-2: #10b981;
+    --mint: #34d399;
+    --navy: #0f172a;
+    --navy-2: #1e293b;
+    --navy-line: #334155;
+    --amber: #f59e0b;
+    --amber-bg: #fffbeb;
+    --amber-ink: #92400e;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-ink: #991b1b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.4; -webkit-text-size-adjust: 100%;
+  }
+  button { font: inherit; cursor: pointer; }
+
+  /* ===== Header ===== */
+  .top { background: #fff; border-bottom: 1px solid var(--line); }
+  .top-in {
+    max-width: 1180px; margin: 0 auto; padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px; flex: none;
+    background: linear-gradient(135deg, var(--green), #0d9488);
+    color: #fff; font-weight: 800; font-size: 13px; display: grid; place-items: center;
+  }
+  .brand b { display: block; font-size: 17px; letter-spacing: -.01em; }
+  .brand small { color: var(--muted); font-size: 12px; }
+  #install {
+    display: none; border: 1px solid #a7f3d0; background: #ecfdf5; color: var(--green);
+    font-weight: 600; font-size: 13px; padding: 8px 14px; border-radius: 10px;
+  }
+
+  /* ===== Layout ===== */
+  .main {
+    max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px;
+    display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 28px; align-items: start;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px;
+    padding: 28px 30px 30px; box-shadow: 0 1px 2px rgba(15,23,42,.04);
+  }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .sec-head h2 { margin: 0; font-size: 21px; letter-spacing: -.01em; }
+  .sec-head h2 i { font-style: normal; color: var(--green); }
+  .step { font-size: 12px; font-weight: 600; color: #94a3b8; white-space: nowrap; }
+  .desc { margin: 6px 0 20px; font-size: 13px; color: var(--muted); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+  .fld label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .fld label span { font-weight: 500; color: #94a3b8; font-size: 12px; }
+  select {
+    width: 100%; appearance: none; -webkit-appearance: none;
+    font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--field)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 14px center;
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 38px 12px 14px; min-height: 48px;
+  }
+  select:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #a7f3d0; outline-offset: 1px; }
+  select:disabled { color: #94a3b8; cursor: not-allowed; background-color: #f1f5f9; }
+
+  .hr { border: 0; border-top: 1px solid var(--line); margin: 24px 0; }
+
+  /* OTR */
+  .row-line { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .row-line .lbl { font-size: 13px; font-weight: 700; }
+  .row-line .val { font-size: 20px; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; }
+  .row-line .val.green { color: var(--green); }
+  .unit-name { font-size: 12px; color: var(--muted); margin-top: 2px; text-align: right; word-break: break-word; }
+  .maxline { text-align: center; font-size: 12px; font-weight: 600; color: var(--green); margin-top: 10px; }
+
+  /* Slider */
+  .slider-row { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+  .nudge {
+    width: 40px; height: 40px; flex: none; border-radius: 50%;
+    border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 20px; line-height: 1;
+  }
+  .nudge:disabled { color: #cbd5e1; cursor: not-allowed; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 28px; background: transparent; margin: 0;
+    --p: 0%;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 8px; border-radius: 99px;
+    background: linear-gradient(to right, var(--green) var(--p), #e2e8f0 var(--p));
+  }
+  input[type=range]::-moz-range-track { height: 8px; border-radius: 99px; background: #e2e8f0; }
+  input[type=range]::-moz-range-progress { height: 8px; border-radius: 99px; background: var(--green); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; margin-top: -9px;
+    background: #fff; border: 3px solid var(--green); box-shadow: 0 2px 6px rgba(5,150,105,.35);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--green);
+  }
+  input[type=range]:disabled { opacity: .45; }
+  .minmax { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; }
+
+  .notice { display: none; margin-top: 14px; padding: 11px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .notice.show { display: block; }
+  .notice.warn { background: var(--amber-bg); color: var(--amber-ink); border: 1px solid #fde68a; }
+  .notice.lock { background: var(--red-bg); color: var(--red-ink); border: 1px solid #fecaca; }
+  .notice.info { background: #f1f5f9; color: #334155; border: 1px solid var(--line); }
+
+  /* Tenor */
+  .tenor-title { font-size: 13px; font-weight: 700; margin: 22px 0 10px; }
+  .tenors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .tn {
+    border: 1px solid var(--line); background: var(--field); color: var(--ink);
+    border-radius: 14px; padding: 12px 6px; text-align: center;
+  }
+  .tn b { display: block; font-size: 14px; }
+  .tn small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+  .tn.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .tn.on small { color: #d1fae5; }
+  .tn:disabled { opacity: .5; cursor: not-allowed; }
+  .tn:disabled small { color: var(--red); font-weight: 600; }
+
+  .dim { opacity: .45; pointer-events: none; }
+
+  /* ===== Panel gelap ===== */
+  .panel {
+    position: sticky; top: 20px;
+    background: var(--navy); color: #fff; border-radius: 26px; padding: 30px 28px 26px;
+    box-shadow: 0 20px 40px rgba(15,23,42,.18);
+  }
+  .eyebrow { color: var(--mint); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+  .panel h3 { margin: 6px 0 18px; font-size: 22px; letter-spacing: -.01em; }
+  .big {
+    background: var(--navy-2); border: 1px solid var(--navy-line); border-radius: 18px; padding: 18px 20px;
+  }
+  .big .l { font-size: 12px; color: #cbd5e1; }
+  .big .n { font-size: 38px; font-weight: 800; color: var(--mint); letter-spacing: -.02em; line-height: 1.15; margin-top: 4px; word-break: break-word; }
+  .big .n small { font-size: 13px; font-weight: 500; color: #94a3b8; letter-spacing: 0; }
+  .big .s { font-size: 12px; color: #94a3b8; margin-top: 6px; }
+  .badge { display: inline-block; background: #064e3b; color: var(--mint); font-size: 10px; font-weight: 800;
+    padding: 2px 7px; border-radius: 99px; margin-left: 6px; letter-spacing: .06em; vertical-align: 1px; }
+  .nego {
+    width: 100%; margin-top: 12px; padding: 11px 14px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    background: transparent; color: #e2e8f0; border: 1px solid var(--navy-line);
+  }
+  .nego:hover:not(:disabled) { background: #1e293b; }
+  .nego.on { background: #064e3b; border-color: #047857; color: #a7f3d0; }
+  .nego:disabled { opacity: .45; cursor: not-allowed; }
+
+  dl { margin: 20px 0 0; padding: 18px 0 0; border-top: 1px solid var(--navy-line); }
+  .li { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; font-size: 13px; padding: 5px 0; }
+  .li dt { color: #cbd5e1; }
+  .li dd { margin: 0; font-weight: 700; text-align: right; }
+  .li.strong { margin-top: 6px; padding-top: 12px; border-top: 1px dashed var(--navy-line); }
+  .li.strong dd { color: var(--mint); }
+  .ltv { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 6px;
+    background: #064e3b; color: var(--mint); }
+  .ltv.warn { background: #78350f; color: #fcd34d; }
+  .ltv.lock { background: #7f1d1d; color: #fecaca; }
+  .foot { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--navy-line); font-size: 11px; line-height: 1.6; color: #94a3b8; }
+
+  /* Upping */
+  .upwrap { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .upbtn {
+    font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 99px;
+    border: 1px dashed #fb923c; background: #fff7ed; color: #c2410c;
+  }
+  .upbtn.on { border-style: solid; background: #f97316; border-color: #f97316; color: #fff; }
+  .upbtn:disabled { opacity: .45; cursor: not-allowed; }
+  .val.up { color: #ea580c; }
+
+  /* Komisi (warna meriah) */
+  .komisi {
+    position: relative; overflow: hidden; margin-top: 26px; padding: 20px 20px 18px; border-radius: 22px; color: #fff;
+    background:
+      radial-gradient(circle at 100% 100%, rgba(253,224,71,.38) 0 46px, transparent 47px),
+      radial-gradient(circle at 100% 100%, rgba(34,211,238,.28) 0 78px, transparent 79px),
+      radial-gradient(circle at 0% 100%, rgba(255,255,255,.16) 0 54px, transparent 55px),
+      linear-gradient(125deg, #ec4899 0%, #f97316 48%, #8b5cf6 100%);
+    box-shadow: 0 14px 30px rgba(236,72,153,.28);
+  }
+  .k-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .k-title { font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+  .k-title i { font-style: normal; color: #fde047; margin-right: 6px; }
+  .k-tag { font-size: 11px; font-weight: 700; background: rgba(255,255,255,.22); padding: 4px 10px; border-radius: 99px; }
+  .k-grid { display: grid; grid-template-columns: minmax(0, 1fr); margin-top: 14px; }
+  .k-tile { border-radius: 16px; padding: 12px 14px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35); transition: transform .15s; }
+  .k-tile small { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12px; font-weight: 700; opacity: .95; }
+  .k-tile b { display: block; font-size: clamp(14px, 3.9vw, 22px); font-weight: 800; margin-top: 4px; letter-spacing: -.01em; white-space: nowrap; }
+  .k-tile .chip { font-size: 9px; font-weight: 800; letter-spacing: .08em; background: #fde047; color: #7c2d12; padding: 2px 7px; border-radius: 99px; display: none; }
+  .k-tile.on { background: #fff; color: #9d174d; border-color: #fff; transform: scale(1.02); box-shadow: 0 8px 18px rgba(0,0,0,.14); }
+  .k-tile.on b { color: #c2410c; }
+  .k-tile.on .chip { display: inline-block; }
+  .k-note { margin-top: 12px; font-size: 12px; font-weight: 600; opacity: .95; }
+
+  /* Bar bawah (HP) */
+  .bar {
+    display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: #fff; border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(15,23,42,.08);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .bar small { display: block; font-size: 11px; color: var(--muted); }
+  .bar b { font-size: 20px; color: var(--green); letter-spacing: -.01em; }
+  .bar button { background: var(--navy); color: #fff; border: 0; border-radius: 12px; padding: 11px 16px; font-weight: 700; font-size: 14px; }
+
+  @media (max-width: 920px) {
+    .main { grid-template-columns: minmax(0, 1fr); padding: 16px 16px 100px; gap: 20px; }
+    .panel { position: static; }
+    .card { padding: 22px 18px 24px; border-radius: 20px; }
+    .bar.show { display: flex; }
+    .top-in { padding: 12px 16px; }
+  }
+  @media (max-width: 520px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .tenors { grid-template-columns: repeat(3, 1fr); }
+    .tn:last-child:nth-child(3n+1) { grid-column: 1 / -1; }
+    .sec-head h2 { font-size: 19px; }
+    .row-line .val { font-size: 18px; }
+    .k-tile { padding: 12px 10px; }
+    .komisi { padding: 18px 16px 16px; }
+    .big .n { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="logo">Rp</div>
+      <div><b>Mitra Karyawan - Dana Tunai</b><small>by Novan Tri Noviana</small></div>
+    </div>
+    <button id="install" type="button">Install Aplikasi</button>
+  </div>
+</header>
+
+<main class="main">
+  <section class="card" id="form">
+    <div class="sec-head">
+      <h2><i>1.</i> Pilih Unit</h2>
+      <span class="step">Langkah 1 dari 2</span>
+    </div>
+    <p class="desc">Pilih merk, tahun, dan model unit untuk menampilkan harga OTR.</p>
+
+    <div class="grid2">
+      <div class="fld"><label for="merk">Merk <span id="hMerk"></span></label><select id="merk"></select></div>
+      <div class="fld"><label for="tahun">Tahun Unit <span id="hTahun"></span></label><select id="tahun" disabled></select></div>
+      <div class="fld"><label for="grup">Kelompok Model <span id="hGrup"></span></label><select id="grup" disabled></select></div>
+      <div class="fld"><label for="detail">Model Detail <span id="hDetail"></span></label><select id="detail" disabled></select></div>
+    </div>
+
+    <hr class="hr" style="margin-bottom:18px">
+    <div class="row-line">
+      <span class="lbl" id="lblOtr">Harga OTR</span>
+      <span class="val" id="otrVal">Rp -</span>
+    </div>
+    <div class="unit-name" id="unitName">Pilih unit terlebih dahulu</div>
+    <div class="upwrap"><button class="upbtn" id="up" type="button" disabled>+ OTR Upping 5%</button></div>
+    <div class="maxline" id="maxLine"></div>
+
+    <hr class="hr">
+    <div id="sec2">
+      <div class="sec-head">
+        <h2><i>2.</i> Rencana Pinjaman Dana</h2>
+        <span class="step">Langkah 2 dari 2</span>
+      </div>
+
+      <div class="row-line" style="margin-top:18px">
+        <span class="lbl">Jumlah Dana yang Diajukan</span>
+        <span class="val green" id="loanVal">Rp -</span>
+      </div>
+      <div class="slider-row">
+        <button class="nudge" id="minus" type="button" aria-label="Kurangi Rp100.000">&minus;</button>
+        <input type="range" id="loan" min="4000000" max="4000000" step="100000" value="4000000" aria-label="Jumlah dana yang diajukan">
+        <button class="nudge" id="plus" type="button" aria-label="Tambah Rp100.000">+</button>
+      </div>
+      <div class="minmax"><span id="minLbl">Min: Rp 4.000.000</span><span id="maxLbl">Maks: -</span></div>
+      <div class="notice" id="notice" role="status"></div>
+
+      <div class="tenor-title">Pilihan Jangka Waktu (Tenor)</div>
+      <div class="tenors" id="tenors"></div>
+
+      <div class="komisi" id="komisi">
+        <div class="k-head">
+          <span class="k-title"><i>&#9733;</i>Komisi (Fee)</span>
+          <span class="k-tag" id="kTag">-</span>
+        </div>
+        <div class="k-grid">
+          <div class="k-tile" id="kNormal"><small>Komisi</small><b id="kNormalVal">-</b></div>
+        </div>
+        <div class="k-note" id="kNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite">
+    <div class="eyebrow">SIMULASI ANGSURAN</div>
+    <h3>Rincian Angsuran Pinjaman</h3>
+
+    <div class="big">
+      <div class="l">Angsuran per Bulan</div>
+      <div class="n"><span id="ang">Rp -</span> <small>/bln</small></div>
+      <div class="s" id="sub">Pilih unit untuk memulai simulasi</div>
+      <button class="nego" id="nego" type="button" disabled>Nego Rate</button>
+    </div>
+
+    <dl>
+      <div class="li"><dt id="lOtr">Harga OTR</dt><dd id="rOtr">-</dd></div>
+      <div class="li"><dt>Pinjaman</dt><dd id="rLoan">-</dd></div>
+      <div class="li"><dt>Admin</dt><dd id="rAdmin">-</dd></div>
+      <div class="li"><dt>Fidusia</dt><dd id="rFid">-</dd></div>
+      <div class="li"><dt>Asuransi (Zona 2)</dt><dd id="rAss">-</dd></div>
+      <div class="li strong"><dt>Pokok Hutang <span class="ltv" id="rLtv" style="display:none"></span></dt><dd id="rPokok">-</dd></div>
+      <div class="li"><dt>DP Nett <span id="rDpPct" style="color:#94a3b8"></span></dt><dd id="rDpn">-</dd></div>
+      <div class="li"><dt>Total DP Bayar</dt><dd id="rTdp">-</dd></div>
+    </dl>
+
+    <p class="foot">*Simulasi ini merupakan estimasi indikatif. Persetujuan dan besaran final ditentukan setelah verifikasi data nasabah dan kondisi unit.</p>
+  </aside>
+</main>
+
+<div class="bar" id="bar">
+  <div><small>Angsuran / bulan</small><b id="barAng">Rp -</b></div>
+  <button type="button" id="barBtn">Lihat Rincian</button>
+</div>
+
+<script>
+const DATA = {"HONDA":{"2026":{"ADV":[["6FM","NEW ADV 160 ABS",37500000],["AT7","NEW ADV 160 CBS",34900000],["AGU","NEW ADV 160 ROADSYNC",38500000]],"BEAT":[["59I","ALL NEW BEAT CBS",17500000],["74A","ALL NEW BEAT DELUXE SMARTKEY",19200000],["578","BEAT DELUXE CBS ISS",18700000],["3JH","BEAT STREAT ESP",18700000]],"CB150R":[["3XE","N CB150R STRETFIRESE",30800000],["AER","NEW CB 150R STREETFIRE",29900000]],"VERZA":[["45O","CB 150 VERZA",21200000],["46J","CB 150 VERZA CW",21800000]],"CB150X":[["6F3","CB 150 X SE",30700000],["692","CB 150X",30300000]],"CBR 150R":[["33F","ALL NEW CBR 150 R",32000000],["49O","CBR 150 R ABS",37100000],["AED","NEW CBR 150R RACING/TRICOLOR-ABS",37700000],["AEH","NEW CBR 150R RACING/TRICOLOR-NON ABS",34000000]],"CBR 250RR":[["AEE","CBR250RR SP",61000000],["AEG","CBR250RR SPQS",64100000],["AEF","CBR250RR SPQS RACING/TRICOLOR",64600000],["3HT","NEW CBR 250 RR STD",51500000]],"CRF":[["42F","CRF 150 L",34300000],["3TI","CRF 250 RL",88000000],["AE6","CRF 250L",79400000]],"GENIO":[["4DO","GENIO CBS",18900000],["AT2","GENIO CBS SPECIAL COLOR",19100000],["4DN","GENIO CBS-ISS",19400000]],"PCX":[["AEC","NEW PCX 160 ABS",35700000],["A2Y","NEW PCX 160 ABS ROADSYNC",38600000],["AEB","NEW PCX 160 CBS",32600000]],"REVO":[["29L","NEW REVO FI FIT",14000000],["41P","NEW REVO X",15400000]],"SCOOPY":[["AEW","NEW SCOOPY ENERGETIC",21700000],["5AS","NEW SCOOPY FASHION",21700000],["5AQ","NEW SCOOPY PRESTIGE",22500000],["5AR","NEW SCOOPY STYLISH",22500000]],"SONIC":[["0SU","SONIC 150 R",21900000],["3PP","SONIC 150 R SE",22300000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",17400000],["2MQ","NEWSUPRA X 125 FI SW",16500000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",20900000],["38F","N SUPRA GTR 150 SPTY",20800000]],"STYLO":[["6XY","STYLO 160 ABS",31300000],["6Y1","STYLO 160 CBS",28500000]],"VARIO":[["ALT","ALL NEW VARIO 125 STREET",26000000],["192","N VARIO 125 ESP CBS",24000000],["195","NVARIO 125 ESPCBSISS",25700000],["69L","VARIO 160 ABS",29000000],["69K","VARIO 160 CBS",26200000]]},"2025":{"ADV":[["AT5","ADV 160 ABS",36300000],["6FJ","ADV 160 CBS",33700000],["6FM","NEW ADV 160 ABS",36500000],["AT7","NEW ADV 160 CBS",33900000],["AGU","NEW ADV 160 ROADSYNC",37500000]],"BEAT":[["59I","ALL NEW BEAT CBS",17200000],["74A","ALL NEW BEAT DELUXE SMARTKEY",18600000],["578","BEAT DELUXE CBS ISS",18100000],["3JH","BEAT STREAT ESP",18200000]],"CB150R":[["3XE","N CB150R STRETFIRESE",29000000],["AER","NEW CB 150R STREETFIRE",28100000]],"VERZA":[["45O","CB 150 VERZA",20000000],["46J","CB 150 VERZA CW",20600000]],"CB150X":[["6F3","CB 150 X SE",28900000],["692","CB 150X",28500000]],"CBR 150R":[["33F","ALL NEW CBR 150 R",28500000],["49O","CBR 150 R ABS",31900000],["AED","NEW CBR 150R RACING/TRICOLOR-ABS",34600000],["AEH","NEW CBR 150R RACING/TRICOLOR-NON ABS",31000000]],"CBR 250RR":[["AEE","CBR250RR SP",53100000],["AEG","CBR250RR SPQS",55800000],["AEF","CBR250RR SPQS RACING/TRICOLOR",56300000],["3HT","NEW CBR 250 RR STD",44800000]],"CRF":[["42F","CRF 150 L",32500000],["3TI","CRF 250 RL",83200000],["AE6","CRF 250L",75100000]],"GENIO":[["4DO","GENIO CBS",17900000],["4DN","GENIO CBS-ISS",18400000]],"PCX":[["AEC","NEW PCX 160 ABS",34700000],["A2Y","NEW PCX 160 ABS ROADSYNC",37600000],["AEB","NEW PCX 160 CBS",31600000]],"REVO":[["29L","NEW REVO FI FIT",12200000],["41P","NEW REVO X",13400000]],"SCOOPY":[["AEW","NEW SCOOPY ENERGETIC",21100000],["5AS","NEW SCOOPY FASHION",21100000],["5AQ","NEW SCOOPY PRESTIGE",21800000],["5AR","NEW SCOOPY STYLISH",21800000]],"SONIC":[["0SU","SONIC 150 R",19100000],["3PP","SONIC 150 R SE",19400000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",16300000],["2MQ","NEWSUPRA X 125 FI SW",15400000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",20300000],["38F","N SUPRA GTR 150 SPTY",20200000]],"STYLO":[["6XY","STYLO 160 ABS",30300000],["6Y1","STYLO 160 CBS",27500000]],"VARIO":[["ALT","ALL NEW VARIO 125 STREET",25000000],["192","N VARIO 125 ESP CBS",23000000],["195","NVARIO 125 ESPCBSISS",24700000],["130","VARIO 125 CBS",22500000],["0JW","VARIO 125 CBS ISS",24200000],["69L","VARIO 160 ABS",27400000],["69K","VARIO 160 CBS",24800000]]},"2024":{"ADV":[["AT5","ADV 160 ABS",34400000],["6FJ","ADV 160 CBS",31800000]],"BEAT":[["59I","ALL NEW BEAT CBS",16200000],["74A","ALL NEW BEAT DELUXE SMARTKEY",17600000],["578","BEAT DELUXE CBS ISS",17100000],["3JH","BEAT STREAT ESP",16700000]],"CB150R":[["3XE","N CB150R STRETFIRESE",27200000],["AER","NEW CB 150R STREETFIRE",26400000]],"VERZA":[["45O","CB 150 VERZA",18800000],["46J","CB 150 VERZA CW",19300000]],"CB150X":[["6F3","CB 150 X SE",27200000],["692","CB 150X",26800000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",31600000],["59M","A N CBR 150R R E ABS",31600000],["3FJ","ALL N CBR 150 R SE A",28300000],["33F","ALL NEW CBR 150 R",27700000],["49O","CBR 150 R ABS",31300000],["AED","NEW CBR 150R RACING/TRICOLOR-ABS",32400000],["AEH","NEW CBR 150R RACING/TRICOLOR-NON ABS",29000000]],"CBR 250RR":[["AEE","CBR250RR SP",49200000],["AEG","CBR250RR SPQS",51700000],["AEF","CBR250RR SPQS RACING/TRICOLOR",52100000],["3HT","NEW CBR 250 RR STD",41500000]],"CRF":[["42F","CRF 150 L",30600000],["3TI","CRF 250 RL",78400000],["AE6","CRF 250L",70800000]],"GENIO":[["4DO","GENIO CBS",16900000],["4DN","GENIO CBS-ISS",17300000]],"PCX":[["5E1","ALL NEW PCX 160 ABS",31900000],["5E2","ALL NEW PCX 160 CBS",30300000],["5E3","ALL NEW PCX 160E:HEV",40800000],["AEC","NEW PCX 160 ABS",32100000],["A2Y","NEW PCX 160 ABS ROADSYNC",34600000],["AEB","NEW PCX 160 CBS",30500000]],"REVO":[["29L","NEW REVO FI FIT",11300000],["41P","NEW REVO X",12400000]],"SCOOPY":[["AEW","NEW SCOOPY ENERGETIC",20100000],["5AS","NEW SCOOPY FASHION",20100000],["5AQ","NEW SCOOPY PRESTIGE",20800000],["5AR","NEW SCOOPY STYLISH",20800000],["AES","SCOOPY FASHION",19900000],["AET","SCOOPY PRESTIGE",20600000],["1QW","SCOOPY SPORTY",19900000],["1LR","SCOOPY STYLISH",20600000]],"SONIC":[["0SU","SONIC 150 R",17600000],["3PP","SONIC 150 R SE",18000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",14700000],["2MQ","NEWSUPRA X 125 FI SW",14000000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",19200000],["38F","N SUPRA GTR 150 SPTY",18900000]],"STYLO":[["6XY","STYLO 160 ABS",29300000],["6Y1","STYLO 160 CBS",26500000]],"VARIO":[["130","VARIO 125 CBS",21500000],["0JW","VARIO 125 CBS ISS",23200000],["69L","VARIO 160 ABS",25800000],["69K","VARIO 160 CBS",23300000]]},"2023":{"ADV":[["AT5","ADV 160 ABS",32400000],["6FJ","ADV 160 CBS",30300000]],"BEAT":[["59I","ALL NEW BEAT CBS",15300000],["59J","ALL NEW BEAT CBS ISS",15600000],["578","BEAT DELUXE CBS ISS",16200000],["3JH","BEAT STREAT ESP",15800000]],"CB150R":[["3XE","N CB150R STRETFIRESE",26200000],["AER","NEW CB 150R STREETFIRE",25400000]],"VERZA":[["45O","CB 150 VERZA",17800000],["46J","CB 150 VERZA CW",18300000]],"CB150X":[["6F3","CB 150 X SE",26200000],["692","CB 150X",25800000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",29500000],["59M","A N CBR 150R R E ABS",29500000],["3FJ","ALL N CBR 150 R SE A",26400000],["33F","ALL NEW CBR 150 R",25800000],["49O","CBR 150 R ABS",29200000]],"CBR 250RR":[["AEE","CBR250RR SP",47700000],["AEG","CBR250RR SPQS",50200000],["AEF","CBR250RR SPQS RACING/TRICOLOR",50600000],["3HT","NEW CBR 250 RR STD",40000000]],"CRF":[["42F","CRF 150 L",29800000],["3TI","CRF 250 RL",76900000],["AE6","CRF 250L",69300000]],"GENIO":[["4DO","GENIO CBS",15900000],["4DN","GENIO CBS-ISS",16300000]],"PCX":[["5E1","ALL NEW PCX 160 ABS",30900000],["5E2","ALL NEW PCX 160 CBS",29300000],["5E3","ALL NEW PCX 160E:HEV",39800000]],"REVO":[["29L","NEW REVO FI FIT",10800000],["41P","NEW REVO X",11900000]],"SCOOPY":[["AES","SCOOPY FASHION",19000000],["AET","SCOOPY PRESTIGE",19700000],["1QW","SCOOPY SPORTY",19000000],["1LR","SCOOPY STYLISH",19700000]],"SONIC":[["0SU","SONIC 150 R",16600000],["3PP","SONIC 150 R SE",17000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",13000000],["2MQ","NEWSUPRA X 125 FI SW",12300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",16600000],["38F","N SUPRA GTR 150 SPTY",16400000]],"VARIO":[["130","VARIO 125 CBS",20300000],["0JW","VARIO 125 CBS ISS",21900000],["69L","VARIO 160 ABS",24800000],["69K","VARIO 160 CBS",22300000]]},"2022":{"ADV":[["4EC","ADV 150 ABS",29800000],["4EB","ADV 150 CBS",27300000],["AT5","ADV 160 ABS",31100000],["6FJ","ADV 160 CBS",28500000]],"BEAT":[["59I","ALL NEW BEAT CBS",14400000],["59J","ALL NEW BEAT CBS ISS",14700000],["578","BEAT DELUXE CBS ISS",15300000],["3JH","BEAT STREAT ESP",14900000]],"CB150R":[["3XE","N CB150R STRETFIRESE",25200000],["AER","NEW CB 150R STREETFIRE",24400000]],"VERZA":[["45O","CB 150 VERZA",16800000],["46J","CB 150 VERZA CW",17300000]],"CB150X":[["6F3","CB 150 X SE",25200000],["692","CB 150X",24800000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",28000000],["59M","A N CBR 150R R E ABS",28000000],["3FJ","ALL N CBR 150 R SE A",24900000],["33F","ALL NEW CBR 150 R",24400000],["49O","CBR 150 R ABS",27700000]],"CBR 250RR":[["59O","CBR 250RR (ABS) R E",47400000],["59N","CBR 250RR (STD) R E",39500000],["AEE","CBR250RR SP",46200000],["AEG","CBR250RR SPQS",48700000],["AEF","CBR250RR SPQS RACING/TRICOLOR",49100000],["3HU","NEW CBR 250 RR ABS",44500000],["3HT","NEW CBR 250 RR STD",38500000]],"CRF":[["42F","CRF 150 L",29000000],["3TI","CRF 250 RL",75400000]],"GENIO":[["4DO","GENIO CBS",14900000],["4DN","GENIO CBS-ISS",15300000]],"PCX":[["5E1","ALL NEW PCX 160 ABS",29900000],["5E2","ALL NEW PCX 160 CBS",28300000],["5E3","ALL NEW PCX 160E:HEV",38800000]],"REVO":[["29L","NEW REVO FI FIT",10300000],["41P","NEW REVO X",11400000]],"SCOOPY":[["AES","SCOOPY FASHION",17700000],["AET","SCOOPY PRESTIGE",18300000],["1QW","SCOOPY SPORTY",17700000],["1LR","SCOOPY STYLISH",18300000]],"SONIC":[["0SU","SONIC 150 R",15600000],["3PP","SONIC 150 R SE",16000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",12000000],["2MQ","NEWSUPRA X 125 FI SW",11300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",15300000],["38F","N SUPRA GTR 150 SPTY",15100000]],"VARIO":[["3QS","NEW VARIO 150 EXS",21400000],["3D1","NEW VARIO 150 SPORTY",21000000],["130","VARIO 125 CBS",19100000],["0JW","VARIO 125 CBS ISS",20600000],["69L","VARIO 160 ABS",23800000],["69K","VARIO 160 CBS",21300000]]},"2021":{"ADV":[["4EC","ADV 150 ABS",29000000],["4EB","ADV 150 CBS",26500000]],"BEAT":[["59I","ALL NEW BEAT CBS",13800000],["59J","ALL NEW BEAT CBS ISS",14100000],["578","BEAT DELUXE CBS ISS",14800000],["3JH","BEAT STREAT ESP",14400000]],"CB150R":[["3XE","N CB150R STRETFIRESE",24200000],["AER","NEW CB 150R STREETFIRE",23400000]],"VERZA":[["45O","CB 150 VERZA",15800000],["46J","CB 150 VERZA CW",16300000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",25000000],["59M","A N CBR 150R R E ABS",25000000],["3FJ","ALL N CBR 150 R SE A",23400000],["33F","ALL NEW CBR 150 R",22900000],["49O","CBR 150 R ABS",24700000]],"CBR 250RR":[["59O","CBR 250RR (ABS) R E",45900000],["59N","CBR 250RR (STD) R E",38000000],["3HU","NEW CBR 250 RR ABS",43000000],["3HT","NEW CBR 250 RR STD",37000000]],"CRF":[["42F","CRF 150 L",28200000],["3TI","CRF 250 RL",73900000]],"GENIO":[["4DO","GENIO CBS",13900000],["4DN","GENIO CBS-ISS",14300000]],"PCX":[["44R","ALL NEW PCX 150 ABS",26500000],["45V","ALL NEW PCX 150 CBS",24700000],["5E1","ALL NEW PCX 160 ABS",28400000],["5E2","ALL NEW PCX 160 CBS",26800000],["5E3","ALL NEW PCX 160E:HEV",35800000],["48R","PCX HYBRID",29300000]],"REVO":[["29L","NEW REVO FI FIT",9800000],["41P","NEW REVO X",10900000]],"SCOOPY":[["AES","SCOOPY FASHION",17000000],["AET","SCOOPY PRESTIGE",17600000],["1QW","SCOOPY SPORTY",17000000],["1LR","SCOOPY STYLISH",17600000]],"SONIC":[["0SU","SONIC 150 R",14600000],["3PP","SONIC 150 R SE",15000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",11000000],["2MQ","NEWSUPRA X 125 FI SW",10300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",13800000],["38F","N SUPRA GTR 150 SPTY",13800000]],"VARIO":[["3QS","NEW VARIO 150 EXS",20600000],["3D1","NEW VARIO 150 SPORTY",20200000],["130","VARIO 125 CBS",17200000],["0JW","VARIO 125 CBS ISS",18700000]]},"2020":{"ADV":[["4EC","ADV 150 ABS",28200000],["4EB","ADV 150 CBS",25700000]],"BEAT":[["59I","ALL NEW BEAT CBS",13600000],["59J","ALL NEW BEAT CBS ISS",13900000],["578","BEAT DELUXE CBS ISS",14800000],["3B3","BEAT FI SPORTY CW",12200000],["3JH","BEAT STREAT ESP",14400000],["19A","N BEAT FI POP CBSISS",10800000],["196","N BEAT FI SPORTY CBS",12400000],["199","NEW BEAT FI POP CBS",10500000],["198","NEW BEAT FI POP CW",10300000],["3S3","NEW BEAT SPORTY ISS",12700000]],"CB150R":[["2E6","CB 150 R STREETFIRE",19900000],["18Y","CB150R STREETFIRE SE",20700000]],"VERZA":[["45O","CB 150 VERZA",14800000],["46J","CB 150 VERZA CW",15300000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",23000000],["59M","A N CBR 150R R E ABS",23000000],["3FJ","ALL N CBR 150 R SE A",21900000],["33F","ALL NEW CBR 150 R",21400000],["49O","CBR 150 R ABS",22200000]],"CBR 250RR":[["59O","CBR 250RR (ABS) R E",44400000],["59N","CBR 250RR (STD) R E",36500000],["3HU","NEW CBR 250 RR ABS",41500000],["3HT","NEW CBR 250 RR STD",35500000]],"CRF":[["42F","CRF 150 L",27400000],["3TI","CRF 250 RL",72400000]],"GENIO":[["4DO","GENIO CBS",13400000],["4DN","GENIO CBS-ISS",13600000]],"PCX":[["44R","ALL NEW PCX 150 ABS",25200000],["45V","ALL NEW PCX 150 CBS",23400000],["48R","PCX HYBRID",26300000]],"REVO":[["29L","NEW REVO FI FIT",9300000],["41P","NEW REVO X",10400000]],"SCOOPY":[["AES","SCOOPY FASHION",16300000],["AET","SCOOPY PRESTIGE",16900000],["1QW","SCOOPY SPORTY",16300000],["1LR","SCOOPY STYLISH",16900000]],"SONIC":[["0SU","SONIC 150 R",13600000],["3PP","SONIC 150 R SE",14000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",10000000],["2MQ","NEWSUPRA X 125 FI SW",9300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",12800000],["38F","N SUPRA GTR 150 SPTY",12800000]],"VARIO":[["2PR","N VARIO110 ESP CBS",12300000],["3QS","NEW VARIO 150 EXS",19800000],["3D1","NEW VARIO 150 SPORTY",19400000],["38J","NVARIO 110 ESPCBSISS",12900000],["130","VARIO 125 CBS",16400000],["0JW","VARIO 125 CBS ISS",17900000]]},"2019":{"ADV":[["4EC","ADV 150 ABS",27400000],["4EB","ADV 150 CBS",24900000]],"BEAT":[["3B3","BEAT FI SPORTY CW",11900000],["3JH","BEAT STREAT ESP",13900000],["19A","N BEAT FI POP CBSISS",10500000],["196","N BEAT FI SPORTY CBS",12100000],["199","NEW BEAT FI POP CBS",10200000],["198","NEW BEAT FI POP CW",10000000],["3S3","NEW BEAT SPORTY ISS",12400000]],"CB150R":[["2E6","CB 150 R STREETFIRE",18900000],["18Y","CB150R STREETFIRE SE",19700000]],"VERZA":[["45O","CB 150 VERZA",13800000],["46J","CB 150 VERZA CW",14300000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",20000000],["59M","A N CBR 150R R E ABS",20000000],["3FJ","ALL N CBR 150 R SE A",19400000],["33F","ALL NEW CBR 150 R",18900000],["49O","CBR 150 R ABS",19700000]],"CBR 250RR":[["59O","CBR 250RR (ABS) R E",42900000],["59N","CBR 250RR (STD) R E",35000000],["3HU","NEW CBR 250 RR ABS",40000000],["3HT","NEW CBR 250 RR STD",34000000]],"CRF":[["42F","CRF 150 L",26600000],["3TI","CRF 250 RL",70900000]],"GENIO":[["4DO","GENIO CBS",12900000],["4DN","GENIO CBS-ISS",13100000]],"PCX":[["44R","ALL NEW PCX 150 ABS",23900000],["45V","ALL NEW PCX 150 CBS",22100000],["48R","PCX HYBRID",23300000]],"REVO":[["29L","NEW REVO FI FIT",8800000],["41P","NEW REVO X",9900000]],"SCOOPY":[["AES","SCOOPY FASHION",15600000],["AET","SCOOPY PRESTIGE",16200000],["1QW","SCOOPY SPORTY",15600000],["1LR","SCOOPY STYLISH",16200000]],"SONIC":[["0SU","SONIC 150 R",12600000],["3PP","SONIC 150 R SE",13000000]],"SUPRA X 125":[["3A3","NEWSUPRA X 125 CW FI",9000000],["2MQ","NEWSUPRA X 125 FI SW",8300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",11800000],["38F","N SUPRA GTR 150 SPTY",11800000]],"VARIO":[["2PR","N VARIO110 ESP CBS",12000000],["3QS","NEW VARIO 150 EXS",19000000],["3D1","NEW VARIO 150 SPORTY",18600000],["38J","NVARIO 110 ESPCBSISS",12600000],["130","VARIO 125 CBS",15600000],["0JW","VARIO 125 CBS ISS",17100000]]},"2018":{"BEAT":[["3B3","BEAT FI SPORTY CW",11600000],["3JH","BEAT STREAT ESP",13400000],["19A","N BEAT FI POP CBSISS",10200000],["196","N BEAT FI SPORTY CBS",11800000],["199","NEW BEAT FI POP CBS",9900000],["198","NEW BEAT FI POP CW",9700000],["3S3","NEW BEAT SPORTY ISS",12100000]],"BLADE":[["35N","NEW BLADE R 125 FI",7600000],["35V","NEW BLADE REPSOL",7800000],["2X6","NEW BLADE S 125 FI",7500000]],"CB150R":[["2E6","CB 150 R STREETFIRE",17900000],["18Y","CB150R STREETFIRE SE",18700000]],"VERZA":[["45O","CB 150 VERZA",12800000],["46J","CB 150 VERZA CW",13300000],["2RR","VERZA 150 CW",9200000],["0SL","VERZA 150 SPOKE",8800000]],"CBR 150R":[["59K","A N CBR 150R GP ABS",17000000],["59M","A N CBR 150R R E ABS",17000000],["3FJ","ALL N CBR 150 R SE A",16400000],["33F","ALL NEW CBR 150 R",15900000],["49O","CBR 150 R ABS",16700000]],"CBR 250RR":[["59O","CBR 250RR (ABS) R E",41400000],["59N","CBR 250RR (STD) R E",33500000],["3HU","NEW CBR 250 RR ABS",38500000],["3HT","NEW CBR 250 RR STD",32500000]],"CRF":[["42F","CRF 150 L",25800000],["3TI","CRF 250 RL",69400000]],"MEGA PRO":[["3B6","NEW MEGA PRO FI",7800000]],"PCX":[["44R","ALL NEW PCX 150 ABS",22600000],["45V","ALL NEW PCX 150 CBS",20800000],["48R","PCX HYBRID",20300000],["32P","PCX150",16800000]],"REVO":[["27V","NEW REVO FI CW",6800000],["29L","NEW REVO FI FIT",8300000],["27W","NEW REVO FI SW",6100000],["41P","NEW REVO X",9400000]],"SCOOPY":[["AES","SCOOPY FASHION",14900000],["AET","SCOOPY PRESTIGE",15500000],["1QW","SCOOPY SPORTY",14900000],["1LR","SCOOPY STYLISH",15500000]],"SPACY":[["2CQ","SPACY HELM IN PGMFI",6200000]],"SONIC":[["0SU","SONIC 150 R",11600000],["3PP","SONIC 150 R SE",12000000]],"SUPRA X 125":[["0OM","NEW SUPRA X 125PGMFI",8400000],["3A3","NEWSUPRA X 125 CW FI",8000000],["2MQ","NEWSUPRA X 125 FI SW",7300000]],"SUPRA GTR":[["38G","N SUPRA GTR 150 EXC",10800000],["38F","N SUPRA GTR 150 SPTY",10800000]],"VARIO":[["2PR","N VARIO110 ESP CBS",11700000],["3QS","NEW VARIO 150 EXS",18200000],["3D1","NEW VARIO 150 SPORTY",17800000],["38J","NVARIO 110 ESPCBSISS",12300000],["130","VARIO 125 CBS",14800000],["0JW","VARIO 125 CBS ISS",16300000]]}},"YAMAHA":{"2026":{"AEROX":[["3KC","AEROX 155 VVA STD",27400000],["A3E","AEROX ALPHA 155 STD",28700000],["A43","AEROX ALPHA CYBERCITY",32700000],["A3L","AEROX ALPHA TURBO",37900000],["A3R","AEROX ALPHA TURBO ULTIMATE",39900000],["6OF","AEROX CYBERCITY 155",27500000],["AE3","ALL NEW AEROX 155 CONNECTED ABS",31100000]],"FAZZIO":[["A1H","FAZZIO HYBRID",20900000],["AFD","FAZZIO LUX HYBRID C",23200000],["6WX","FAZZIO NEO HYBRID C",22500000]],"FINO":[["2IQ","FINO",18100000],["3V0","FINO GRANDE 125",19100000]],"FREEGO":[["49X","FREEGO",20000000],["6MC","FREEGO 125 CONNECTED",21700000]],"GEAR":[["5B4","GEAR 125",17100000],["5B3","GEAR 125 S-VERSION",17500000],["A8I","GEAR ULTIMA 125",17700000],["A9W","GEAR ULTIMA HYBRID S",19000000]],"GRAND FILANO":[["AEO","GRAND FILANO HYBRID LUX CONNECTED",27000000],["AEQ","GRAND FILANO HYBRID NEO CONNECTED",26300000]],"JUPITER":[["2GT","JUPITER Z1 CW",17300000]],"MX KING":[["3XZ","MX KING 150",24900000]],"LEXI":[["6YB","LEXI LX 155 CONNECTED/ABS",29600000],["6Y9","LEXI LX 155 S",27100000],["6Y4","LEXI LX 155 STANDARD",25400000]],"MIO":[["1LH","NEW MIO M3 125 CW",14700000]],"MT":[["4B3","MT 15",31500000],["1DH","MT 25",46800000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",34100000],["5DI","ALL NEW NMAX 155 CON",30600000],["575","ALL NEW NMAX 155 STD",29900000],["72Y","NMAX NEO S VERSION",32200000],["72Z","NMAX NEO VERSION",31200000],["72X","NMAX TURBO",36000000],["733","NMAX TURBO TECH MAX",42600000],["735","NMAX TURBO TECH MAX ULTIMATE",44500000]],"R15":[["6D9","A N R15 155 C N ABS",36700000],["6CX","ALL NEW R15 C ABS",40800000]],"R25":[["2VY","R25",56500000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",15800000]],"VIXION":[["3X8","ALL NEW VIXION",24500000],["3ZC","ALL NEW VIXION-R",25900000]],"WR 155 R":[["56Z","WR 155 R",37400000]],"XSR":[["56S","ALL NEW XSR 155",36800000]],"XMAX":[["6V6","X MAX CONNECTED",66800000],["A00","XMAX TECH MAX",73600000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",16500000]]},"2025":{"AEROX":[["3KC","AEROX 155 VVA STD",26900000],["A3E","AEROX ALPHA 155 STD",28200000],["A43","AEROX ALPHA CYBERCITY",32200000],["A3L","AEROX ALPHA TURBO",37400000],["A3R","AEROX ALPHA TURBO ULTIMATE",39400000],["6OF","AEROX CYBERCITY 155",27000000],["AE3","ALL NEW AEROX 155 CONNECTED ABS",30600000]],"FAZZIO":[["A1H","FAZZIO HYBRID",19800000],["AFD","FAZZIO LUX HYBRID C",21900000],["6WX","FAZZIO NEO HYBRID C",21300000]],"FINO":[["2IQ","FINO",17100000],["3V0","FINO GRANDE 125",18000000]],"FREEGO":[["49X","FREEGO",18900000],["6MC","FREEGO 125 CONNECTED",20400000]],"GEAR":[["5B4","GEAR 125",16100000],["5B3","GEAR 125 S-VERSION",16500000],["A8I","GEAR ULTIMA 125",16700000],["A9W","GEAR ULTIMA HYBRID S",17900000]],"GRAND FILANO":[["AEO","GRAND FILANO HYBRID LUX CONNECTED",25500000],["AEQ","GRAND FILANO HYBRID NEO CONNECTED",24900000]],"JUPITER":[["2GT","JUPITER Z1 CW",15000000]],"MX KING":[["3XZ","MX KING 150",23400000]],"LEXI":[["6YB","LEXI LX 155 CONNECTED/ABS",28000000],["6Y9","LEXI LX 155 S",24200000],["6Y4","LEXI LX 155 STANDARD",24000000]],"MIO":[["1LH","NEW MIO M3 125 CW",12800000]],"MT":[["4B3","MT 15",29300000],["1DH","MT 25",44800000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",33600000],["5DI","ALL NEW NMAX 155 CON",30100000],["575","ALL NEW NMAX 155 STD",29400000],["72Y","NMAX NEO S VERSION",31700000],["72Z","NMAX NEO VERSION",30700000],["72X","NMAX TURBO",35500000],["733","NMAX TURBO TECH MAX",40600000],["735","NMAX TURBO TECH MAX ULTIMATE",42500000]],"R15":[["6D9","A N R15 155 C N ABS",34600000],["6CX","ALL NEW R15 C ABS",38500000]],"R25":[["2VY","R25",53300000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",13700000]],"VIXION":[["3X8","ALL NEW VIXION",22500000],["3ZC","ALL NEW VIXION-R",24900000]],"WR 155 R":[["56Z","WR 155 R",35400000]],"XSR":[["56S","ALL NEW XSR 155",33900000],["6IS","ALL NEW XSR 155 WGP",34200000]],"XMAX":[["6V6","X MAX CONNECTED",62200000],["A00","XMAX TECH MAX",69400000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",16000000]]},"2024":{"AEROX":[["3KC","AEROX 155 VVA STD",25400000],["A3E","AEROX ALPHA 155 STD",26700000],["A43","AEROX ALPHA CYBERCITY",30500000],["A3L","AEROX ALPHA TURBO",35400000],["A3R","AEROX ALPHA TURBO ULTIMATE",37200000],["6OF","AEROX CYBERCITY 155",25600000],["AE3","ALL NEW AEROX 155 CONNECTED ABS",29000000]],"BYSON":[["0T4","BYSON FI",15000000]],"FAZZIO":[["A1H","FAZZIO HYBRID",18700000],["AFD","FAZZIO LUX HYBRID C",21000000],["6WX","FAZZIO NEO HYBRID C",20600000]],"FINO":[["2IQ","FINO",16100000],["3V0","FINO GRANDE 125",16900000]],"FREEGO":[["49X","FREEGO",17700000],["6MC","FREEGO 125 CONNECTED",19200000]],"GEAR":[["5B4","GEAR 125",15200000],["5B3","GEAR 125 S-VERSION",15500000]],"GRAND FILANO":[["AEO","GRAND FILANO HYBRID LUX CONNECTED",24100000],["AEQ","GRAND FILANO HYBRID NEO CONNECTED",23500000]],"JUPITER":[["2GT","JUPITER Z1 CW",13900000]],"MX KING":[["3XZ","MX KING 150",22000000],["1I2","N JUPITER MXKING15GP",20600000]],"LEXI":[["466","LEXI",19000000],["6YB","LEXI LX 155 CONNECTED/ABS",26400000],["6Y9","LEXI LX 155 S",22800000],["6Y4","LEXI LX 155 STANDARD",22600000],["465","LEXI S",21700000],["4C1","LEXI S ABS",23800000]],"MIO":[["3N5","MIO M3 AKS SSS",11100000],["1LH","NEW MIO M3 125 CW",11900000]],"MT":[["4B3","MT 15",27600000],["1DH","MT 25",43000000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",32100000],["5DI","ALL NEW NMAX 155 CON",29400000],["575","ALL NEW NMAX 155 STD",28200000],["72Y","NMAX NEO S VERSION",29900000],["72Z","NMAX NEO VERSION",29000000],["72X","NMAX TURBO",33600000],["733","NMAX TURBO TECH MAX",38400000],["735","NMAX TURBO TECH MAX ULTIMATE",40200000]],"R15":[["6D9","A N R15 155 C N ABS",32500000],["6UY","ALL NEW R 15 CONNECTED GP",35500000],["3O7","ALL NEW R15 155 VVA",29600000],["6CX","ALL NEW R15 C ABS",36100000],["40I","ALL NEW R15 GP155VVA",29800000]],"R25":[["2VY","R25",50000000],["18V","R25 ABS",58300000],["0TB","R25 MOVISTAR GP TECH",48600000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",12700000],["3Q3","VEGA FORCE DB SW",11100000]],"VIXION":[["3X8","ALL NEW VIXION",21200000],["3ZC","ALL NEW VIXION-R",23600000],["2IV","N VIXION KS MT GP LV",20400000]],"WR 155 R":[["56Z","WR 155 R",33400000],["6V5","WR 155 R MONSTER ENERGY RACING",32300000]],"XSR":[["56S","ALL NEW XSR 155",32400000],["6IS","ALL NEW XSR 155 WGP",32900000]],"XMAX":[["6V6","X MAX CONNECTED",64300000],["42Y","XMAX",61600000],["A00","XMAX TECH MAX",65600000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",13900000]]},"2023":{"AEROX":[["5AJ","A N AEROX 155 CONABS",27100000],["5C5","A N AEROX155CONONABS",23800000],["1LM","AEROX",23600000],["5H2","AEROX 155 CON GP ABS",25700000],["3YE","AEROX 155 GP",21800000],["3RI","AEROX 155 VVA R",23000000],["3PU","AEROX 155 VVA S",25400000],["3KC","AEROX 155 VVA STD",24400000],["6OF","AEROX CYBERCITY 155",24600000],["AE3","ALL NEW AEROX 155 CONNECTED ABS",27800000]],"BYSON":[["0T4","BYSON FI",14000000]],"FAZZIO":[["AFD","FAZZIO LUX HYBRID C",20300000],["6WX","FAZZIO NEO HYBRID C",19900000]],"FINO":[["2IQ","FINO",15100000],["3V0","FINO GRANDE 125",15900000]],"FREEGO":[["49X","FREEGO",16700000],["6MC","FREEGO 125 CONNECTED",18200000]],"GEAR":[["5B4","GEAR 125",14700000],["5B3","GEAR 125 S-VERSION",14500000]],"GRAND FILANO":[["AEO","GRAND FILANO HYBRID LUX CONNECTED",23300000],["AEQ","GRAND FILANO HYBRID NEO CONNECTED",22700000]],"JUPITER":[["2GT","JUPITER Z1 CW",12900000]],"MX KING":[["3XZ","MX KING 150",21000000],["1I2","N JUPITER MXKING15GP",19600000]],"LEXI":[["466","LEXI",17900000],["465","LEXI S",20700000],["4C1","LEXI S ABS",22800000]],"MIO":[["3N5","MIO M3 AKS SSS",10600000],["1LH","NEW MIO M3 125 CW",11400000]],"MT":[["4B3","MT 15",23700000],["1DH","MT 25",37200000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",30300000],["5DI","ALL NEW NMAX 155 CON",27700000],["575","ALL NEW NMAX 155 STD",26600000]],"R15":[["6D9","A N R15 155 C N ABS",30000000],["6UY","ALL NEW R 15 CONNECTED GP",33000000],["3O7","ALL NEW R15 155 VVA",28600000],["6CX","ALL NEW R15 C ABS",33600000],["40I","ALL NEW R15 GP155VVA",28800000]],"R25":[["2VY","R25",47500000],["18V","R25 ABS",55800000],["0TB","R25 MOVISTAR GP TECH",46100000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",11700000],["3Q3","VEGA FORCE DB SW",10600000]],"VIXION":[["3X8","ALL NEW VIXION",18800000],["3ZC","ALL NEW VIXION-R",20300000],["2IV","N VIXION KS MT GP LV",17500000]],"WR 155 R":[["56Z","WR 155 R",30900000],["6V5","WR 155 R MONSTER ENERGY RACING",31300000]],"XSR":[["56S","ALL NEW XSR 155",30400000],["6IS","ALL NEW XSR 155 WGP",30900000]],"XMAX":[["6V6","X MAX CONNECTED",61000000],["42Y","XMAX",58400000],["A00","XMAX TECH MAX",61900000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",12800000]]},"2022":{"AEROX":[["5AJ","A N AEROX 155 CONABS",25500000],["5C5","A N AEROX155CONONABS",22400000],["1LM","AEROX",22200000],["5H2","AEROX 155 CON GP ABS",24200000],["3YE","AEROX 155 GP",20800000],["3RI","AEROX 155 VVA R",22000000],["3PU","AEROX 155 VVA S",24400000]],"BYSON":[["0T4","BYSON FI",13000000]],"FAZZIO":[["AFD","FAZZIO LUX HYBRID C",19600000],["6WX","FAZZIO NEO HYBRID C",18800000]],"FINO":[["2IQ","FINO",14100000],["3V0","FINO GRANDE 125",14900000]],"FREEGO":[["49X","FREEGO",15700000],["6MC","FREEGO 125 CONNECTED",17200000],["49W","FREEGO S",15000000],["49Y","FREEGO S ABS",16900000]],"GEAR":[["5B4","GEAR 125",14200000],["5B3","GEAR 125 S-VERSION",13500000]],"GRAND FILANO":[["AEO","GRAND FILANO HYBRID LUX CONNECTED",22500000],["AEQ","GRAND FILANO HYBRID NEO CONNECTED",21900000]],"JUPITER":[["2GT","JUPITER Z1 CW",11900000]],"MX KING":[["3XZ","MX KING 150",20000000],["1I2","N JUPITER MXKING15GP",18600000]],"LEXI":[["466","LEXI",16700000],["465","LEXI S",19300000],["4C1","LEXI S ABS",21400000]],"MIO":[["3N5","MIO M3 AKS SSS",10100000],["41S","MIO S",9900000],["3UV","MIO Z",9000000],["1LH","NEW MIO M3 125 CW",10900000]],"MT":[["4B3","MT 15",22400000],["1DH","MT 25",34700000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",28500000],["5DI","ALL NEW NMAX 155 CON",26100000],["575","ALL NEW NMAX 155 STD",25000000]],"R15":[["6D9","A N R15 155 C N ABS",27500000],["6UY","ALL NEW R 15 CONNECTED GP",30500000],["3O7","ALL NEW R15 155 VVA",27600000],["6CX","ALL NEW R15 C ABS",31100000],["40I","ALL NEW R15 GP155VVA",27800000]],"R25":[["2VY","R25",45000000],["18V","R25 ABS",53300000],["0TB","R25 MOVISTAR GP TECH",43600000]],"SOUL GT":[["AEX","ALL NEW SOUL GT 125 AKS",11900000],["AEY","ALL NEW SOUL GT 125 AKS SSS",12300000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",10700000],["3Q3","VEGA FORCE DB SW",10100000]],"VIXION":[["3X8","ALL NEW VIXION",17800000],["3ZC","ALL NEW VIXION-R",18600000],["2IV","N VIXION KS MT GP LV",16100000]],"WR 155 R":[["56Z","WR 155 R",28400000],["6V5","WR 155 R MONSTER ENERGY RACING",30300000]],"XSR":[["56S","ALL NEW XSR 155",28500000],["6IS","ALL NEW XSR 155 WGP",29000000]],"XMAX":[["6V6","X MAX CONNECTED",57600000],["42Y","XMAX",55200000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",11000000]]},"2021":{"AEROX":[["5AJ","A N AEROX 155 CONABS",24500000],["5C5","A N AEROX155CONONABS",21400000],["1LM","AEROX",21200000],["5H2","AEROX 155 CON GP ABS",23200000],["3YE","AEROX 155 GP",19800000],["3RI","AEROX 155 VVA R",21000000],["3PU","AEROX 155 VVA S",23400000]],"BYSON":[["0T4","BYSON FI",12000000]],"FINO":[["2IQ","FINO",13100000],["3V0","FINO GRANDE 125",13900000]],"FREEGO":[["49X","FREEGO",14700000],["49W","FREEGO S",14000000],["49Y","FREEGO S ABS",15900000]],"GEAR":[["5B4","GEAR 125",13800000],["5B3","GEAR 125 S-VERSION",12500000]],"JUPITER":[["2GT","JUPITER Z1 CW",10900000]],"MX KING":[["3XZ","MX KING 150",19000000],["1I2","N JUPITER MXKING15GP",17600000]],"LEXI":[["466","LEXI",15100000],["465","LEXI S",17400000],["4C1","LEXI S ABS",19900000]],"MIO":[["3N5","MIO M3 AKS SSS",9600000],["41S","MIO S",9400000],["3UV","MIO Z",8500000],["1LH","NEW MIO M3 125 CW",10400000]],"MT":[["4B3","MT 15",20900000],["1DH","MT 25",33200000]],"NMAX":[["57U","ALL NEW NMAX 155 ABS",27500000],["5DI","ALL NEW NMAX 155 CON",25100000],["575","ALL NEW NMAX 155 STD",24000000],["029","N-MAX",22100000],["02F","N-MAX ABS",24900000]],"R15":[["3O7","ALL NEW R15 155 VVA",26600000],["40I","ALL NEW R15 GP155VVA",26800000]],"R25":[["2VY","R25",42500000],["18V","R25 ABS",50800000],["0TB","R25 MOVISTAR GP TECH",41100000]],"SOUL GT":[["AEX","ALL NEW SOUL GT 125 AKS",11400000],["AEY","ALL NEW SOUL GT 125 AKS SSS",11800000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",9700000],["3Q3","VEGA FORCE DB SW",9600000]],"VIXION":[["3X8","ALL NEW VIXION",16800000],["3ZC","ALL NEW VIXION-R",17900000],["2IV","N VIXION KS MT GP LV",15100000]],"WR 155 R":[["56Z","WR 155 R",26600000],["6V5","WR 155 R MONSTER ENERGY RACING",29300000]],"XSR":[["56S","ALL NEW XSR 155",27000000]],"XMAX":[["6V6","X MAX CONNECTED",54800000],["42Y","XMAX",52400000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",9200000]]},"2020":{"AEROX":[["5AJ","A N AEROX 155 CONABS",23500000],["5C5","A N AEROX155CONONABS",20400000],["1LM","AEROX",20200000],["5H2","AEROX 155 CON GP ABS",22200000],["3YE","AEROX 155 GP",18800000],["3RI","AEROX 155 VVA R",20000000],["3PU","AEROX 155 VVA S",22400000]],"BYSON":[["0T4","BYSON FI",11000000]],"FINO":[["2IQ","FINO",12100000],["3V0","FINO GRANDE 125",12900000]],"FREEGO":[["49X","FREEGO",13700000],["49W","FREEGO S",13000000],["49Y","FREEGO S ABS",14900000]],"GEAR":[["5B4","GEAR 125",13400000],["5B3","GEAR 125 S-VERSION",11500000]],"JUPITER":[["2GT","JUPITER Z1 CW",9900000]],"MX KING":[["3XZ","MX KING 150",18000000],["1I2","N JUPITER MXKING15GP",16600000]],"LEXI":[["466","LEXI",14100000],["465","LEXI S",16400000],["4C1","LEXI S ABS",18300000]],"MIO":[["209","MIO M3 125 SP",8200000],["3N5","MIO M3 AKS SSS",9100000],["41S","MIO S",8900000],["3UV","MIO Z",8000000],["1LH","NEW MIO M3 125 CW",9900000]],"MT":[["4B3","MT 15",19400000],["1DH","MT 25",31700000]],"NMAX":[["029","N-MAX",21100000],["02F","N-MAX ABS",23900000]],"R15":[["3O7","ALL NEW R15 155 VVA",25600000],["40I","ALL NEW R15 GP155VVA",25800000]],"R25":[["2VY","R25",40000000],["18V","R25 ABS",48300000],["0TB","R25 MOVISTAR GP TECH",38600000]],"SOUL GT":[["AEX","ALL NEW SOUL GT 125 AKS",10900000],["AEY","ALL NEW SOUL GT 125 AKS SSS",11300000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",8700000],["3Q3","VEGA FORCE DB SW",9100000]],"VIXION":[["3X8","ALL NEW VIXION",15300000],["3ZC","ALL NEW VIXION-R",16900000],["2IV","N VIXION KS MT GP LV",14100000]],"WR 155 R":[["56Z","WR 155 R",24900000]],"XSR":[["56S","ALL NEW XSR 155",25500000]],"XMAX":[["42Y","XMAX",49600000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",7400000]]},"2019":{"AEROX":[["1LM","AEROX",19200000],["3YE","AEROX 155 GP",17800000],["3RI","AEROX 155 VVA R",19000000],["3PU","AEROX 155 VVA S",21400000]],"BYSON":[["0T4","BYSON FI",10000000]],"FINO":[["2IQ","FINO",11100000],["3V0","FINO GRANDE 125",11900000]],"FREEGO":[["49X","FREEGO",12700000],["49W","FREEGO S",12000000],["49Y","FREEGO S ABS",13900000]],"JUPITER":[["2GT","JUPITER Z1 CW",8900000]],"MX KING":[["3XZ","MX KING 150",17000000],["1I2","N JUPITER MXKING15GP",15600000]],"LEXI":[["466","LEXI",13100000],["465","LEXI S",15400000],["4C1","LEXI S ABS",17300000]],"MIO":[["209","MIO M3 125 SP",7700000],["3N5","MIO M3 AKS SSS",8600000],["41S","MIO S",8400000],["3UV","MIO Z",7500000],["1LH","NEW MIO M3 125 CW",9400000]],"MT":[["4B3","MT 15",17900000],["1DH","MT 25",30200000]],"NMAX":[["029","N-MAX",20100000],["02F","N-MAX ABS",22900000]],"R15":[["3O7","ALL NEW R15 155 VVA",24600000],["40I","ALL NEW R15 GP155VVA",24800000]],"R25":[["2VY","R25",37000000],["18V","R25 ABS",45300000],["0TB","R25 MOVISTAR GP TECH",35600000]],"SOUL GT":[["AEX","ALL NEW SOUL GT 125 AKS",10400000],["AEY","ALL NEW SOUL GT 125 AKS SSS",10800000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",7700000],["3Q3","VEGA FORCE DB SW",8600000]],"VIXION":[["3X8","ALL NEW VIXION",14800000],["3ZC","ALL NEW VIXION-R",15900000],["2IV","N VIXION KS MT GP LV",13100000]],"XABRE":[["3C7","XABRE",14400000]],"XMAX":[["42Y","XMAX",46800000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",5900000]]},"2018":{"AEROX":[["1LM","AEROX",18200000],["3YE","AEROX 155 GP",16800000],["3RI","AEROX 155 VVA R",18000000],["3PU","AEROX 155 VVA S",20400000]],"BYSON":[["0T4","BYSON FI",9000000]],"FINO":[["2IQ","FINO",10100000],["3V0","FINO GRANDE 125",10900000]],"FREEGO":[["49X","FREEGO",11700000],["49W","FREEGO S",11000000],["49Y","FREEGO S ABS",12900000]],"JUPITER":[["2GT","JUPITER Z1 CW",7900000]],"MX KING":[["3XZ","MX KING 150",16000000],["1I2","N JUPITER MXKING15GP",14600000]],"LEXI":[["466","LEXI",12100000],["465","LEXI S",14400000],["4C1","LEXI S ABS",16300000]],"MIO":[["209","MIO M3 125 SP",7200000],["3N5","MIO M3 AKS SSS",8100000],["41S","MIO S",7900000],["3UV","MIO Z",7000000],["1LH","NEW MIO M3 125 CW",8900000]],"MT":[["1DH","MT 25",28700000]],"NMAX":[["029","N-MAX",19100000],["02F","N-MAX ABS",21900000]],"R15":[["3O7","ALL NEW R15 155 VVA",23600000],["40I","ALL NEW R15 GP155VVA",23800000]],"R25":[["2VY","R25",34000000],["18V","R25 ABS",42300000],["0TB","R25 MOVISTAR GP TECH",32600000]],"SOUL GT":[["AEX","ALL NEW SOUL GT 125 AKS",9900000],["AEY","ALL NEW SOUL GT 125 AKS SSS",10300000],["2VC","GT 125",7200000],["1DA","NEW SOUL GT 125",8100000]],"VEGA FORCE":[["1H5","VEGA FORCE DB CW",6700000],["3Q3","VEGA FORCE DB SW",8100000]],"VIXION":[["3X8","ALL NEW VIXION",13800000],["3ZC","ALL NEW VIXION-R",14900000],["2IV","N VIXION KS MT GP LV",12100000]],"XABRE":[["3C7","XABRE",13400000]],"XMAX":[["42Y","XMAX",44000000]],"X-RIDE":[["3YD","ALL NEW X-RIDE 125",5200000],["373","X - RIDE",4700000]]}},"KAWASAKI":{"2026":{"D-TRACKER":[["231","D TRACKER X",61900000]],"NINJA 250":[["4AI","NEW NINJA 250",61700000],["59P","NNINJA 250SE ABSMDP",72000000]],"Z125 PRO":[["49D","Z125 PRO",27100000]],"KLX 150":[["1HS","KLX 150",34300000],["1HY","KLX 150 S",31100000],["6V7","KLX 150 SE",34700000],["6V9","KLX 150 SM",34600000],["6OP","KLX 150 SM SE",36700000]],"KLX 230":[["4DS","KLX 230",39100000],["4DT","KLX 230 SE",45100000],["6I7","KLX 230 SM SE NEW",46700000],["6VE","NEW KLX 230 SM",45100000]],"KLX 250":[["01D","KLX 250",61500000]],"VERSYS X 250":[["4AH","VERSYS X 250",55800000],["3TJ","VERSYS X 250 TOURER",64800000]],"W 175":[["AOV","W 175 ABS",34400000],["AOU","W 175 STREET ABS",34800000]]},"2025":{"D-TRACKER":[["231","D TRACKER X",53900000]],"NINJA 250":[["4AI","NEW NINJA 250",58100000],["59P","NNINJA 250SE ABSMDP",67900000]],"Z125 PRO":[["49D","Z125 PRO",23600000]],"KLX 150":[["1HS","KLX 150",32300000],["1HY","KLX 150 S",29400000],["6V7","KLX 150 SE",33300000],["6V9","KLX 150 SM",33200000],["6OP","KLX 150 SM SE",35300000]],"KLX 230":[["4DS","KLX 230",38100000],["4DT","KLX 230 SE",43000000],["6I7","KLX 230 SM SE NEW",45300000],["6VE","NEW KLX 230 SM",43700000]],"KLX 250":[["01D","KLX 250",59500000]],"VERSYS X 250":[["4AH","VERSYS X 250",52600000],["3TJ","VERSYS X 250 TOURER",61100000]],"W 175":[["4AK","W 175 CAFE",32100000],["431","W 175 SE",31200000],["A7L","W 175 SE BLACK STYLE",32100000],["42L","W 175 STD",26800000],["59S","W 175 TR",28300000],["58W","W 175 TR SE",30200000]]},"2024":{"D-TRACKER":[["26R","D TRACKER 150",28200000],["3RX","D TRACKER SE 150 CC",30100000],["231","D TRACKER X",49900000]],"NINJA 250":[["4AI","NEW NINJA 250",54600000],["59P","NNINJA 250SE ABSMDP",63800000]],"Z125 PRO":[["49D","Z125 PRO",21900000],["49C","Z125 PRO SE",34600000]],"KLX 150":[["1HS","KLX 150",30300000],["1HY","KLX 150 S",27600000],["6V7","KLX 150 SE",32500000],["6V9","KLX 150 SM",30600000],["6OP","KLX 150 SM SE",32500000]],"KLX 230":[["4DS","KLX 230",31600000],["4DT","KLX 230 SE",36400000],["6I7","KLX 230 SM SE NEW",37600000],["6VE","NEW KLX 230 SM",36400000]],"KLX 250":[["01D","KLX 250",49600000]],"KSR 110":[["2LC","KSR 110",32300000]],"VERSYS X 250":[["4AH","VERSYS X 250",49400000],["3TJ","VERSYS X 250 TOURER",57400000]],"W 175":[["4AK","W 175 CAFE",29700000],["431","W 175 SE",28600000],["A7L","W 175 SE BLACK STYLE",29600000],["42L","W 175 STD",24600000],["59S","W 175 TR",25900000],["58W","W 175 TR SE",28200000]]},"2023":{"D-TRACKER":[["26R","D TRACKER 150",27200000],["3RX","D TRACKER SE 150 CC",29100000],["231","D TRACKER X",48400000]],"NINJA 250":[["4AI","NEW NINJA 250",52100000],["3WJ","NINJA 250 SL",27700000],["59P","NNINJA 250SE ABSMDP",61300000]],"Z125 PRO":[["49D","Z125 PRO",20900000],["49C","Z125 PRO SE",33100000]],"KLX 150":[["1HS","KLX 150",29300000],["0BX","KLX 150 BF SE",27200000],["1HY","KLX 150 S",26600000],["6V7","KLX 150 SE",30500000],["6V9","KLX 150 SM",29600000],["6OP","KLX 150 SM SE",30000000]],"KLX 230":[["4DS","KLX 230",30100000],["4DT","KLX 230 SE",34900000],["6I7","KLX 230 SM SE NEW",36100000],["6VE","NEW KLX 230 SM",34900000]],"KLX 250":[["01D","KLX 250",48100000]],"KSR 110":[["2LC","KSR 110",29800000]],"VERSYS X 250":[["4AH","VERSYS X 250",46900000],["3TJ","VERSYS X 250 TOURER",54900000]],"W 175":[["4AK","W 175 CAFE",28700000],["431","W 175 SE",27600000],["A7L","W 175 SE BLACK STYLE",28600000],["42L","W 175 STD",23600000],["59S","W 175 TR",24900000],["58W","W 175 TR SE",27200000]]},"2022":{"D-TRACKER":[["26R","D TRACKER 150",26200000],["3RX","D TRACKER SE 150 CC",28100000],["231","D TRACKER X",46900000]],"NINJA 250":[["59L","N NINJA 250 SE ABS",56300000],["4AI","NEW NINJA 250",49600000],["47Z","NINJA 250 SE NON ABS",48400000],["3WJ","NINJA 250 SL",26700000],["59P","NNINJA 250SE ABSMDP",58800000]],"Z125 PRO":[["49D","Z125 PRO",19900000],["49C","Z125 PRO SE",31600000]],"KLX 150":[["1HS","KLX 150",28300000],["3CV","KLX 150 BF",25700000],["0BX","KLX 150 BF SE",26200000],["1HY","KLX 150 S",25600000],["6V7","KLX 150 SE",28700000],["3XL","KLX 150BF SE EXTREME",27600000]],"KLX 230":[["4DS","KLX 230",28600000],["4DT","KLX 230 SE",33400000],["6I7","KLX 230 SM SE NEW",34600000],["6VE","NEW KLX 230 SM",33400000]],"KLX 250":[["01D","KLX 250",46600000]],"KSR 110":[["2LC","KSR 110",27300000]],"VERSYS X 250":[["4AH","VERSYS X 250",44400000],["3TJ","VERSYS X 250 TOURER",52400000]],"W 175":[["4AK","W 175 CAFE",27700000],["431","W 175 SE",26600000],["42L","W 175 STD",22600000],["59S","W 175 TR",23900000],["58W","W 175 TR SE",26200000]],"W 250":[["49A","W 250",53000000],["49B","W 250 SE",53900000]]},"2021":{"D-TRACKER":[["26R","D TRACKER 150",25200000],["3RX","D TRACKER SE 150 CC",27100000],["231","D TRACKER X",45400000]],"NINJA 250":[["59L","N NINJA 250 SE ABS",53800000],["4AI","NEW NINJA 250",47100000],["47Z","NINJA 250 SE NON ABS",45900000],["3WJ","NINJA 250 SL",25700000],["59P","NNINJA 250SE ABSMDP",56300000]],"Z125 PRO":[["49D","Z125 PRO",18900000],["49C","Z125 PRO SE",30100000]],"KLX 150":[["1HS","KLX 150",27300000],["3CV","KLX 150 BF",24700000],["0BX","KLX 150 BF SE",25200000],["1HY","KLX 150 S",24600000],["6V7","KLX 150 SE",27700000],["3XL","KLX 150BF SE EXTREME",26600000]],"KLX 230":[["4DS","KLX 230",27100000],["4DT","KLX 230 SE",31900000]],"KLX 250":[["01D","KLX 250",45100000]],"KSR 110":[["2LC","KSR 110",24800000]],"VERSYS X 250":[["4AH","VERSYS X 250",41900000],["3TJ","VERSYS X 250 TOURER",49900000]],"W 175":[["4AK","W 175 CAFE",26700000],["431","W 175 SE",25600000],["42L","W 175 STD",21600000],["59S","W 175 TR",22900000],["58W","W 175 TR SE",25200000]],"W 250":[["49A","W 250",50500000],["49B","W 250 SE",51400000]]},"2020":{"D-TRACKER":[["26R","D TRACKER 150",24200000],["3RX","D TRACKER SE 150 CC",26100000],["231","D TRACKER X",43900000]],"NINJA 250":[["59L","N NINJA 250 SE ABS",51300000],["4AI","NEW NINJA 250",44600000],["47Z","NINJA 250 SE NON ABS",43400000],["3WJ","NINJA 250 SL",24700000],["59P","NNINJA 250SE ABSMDP",53800000]],"Z125 PRO":[["49D","Z125 PRO",17900000],["49C","Z125 PRO SE",28600000]],"KLX 150":[["1HS","KLX 150",26300000],["3CV","KLX 150 BF",23700000],["0BX","KLX 150 BF SE",24200000],["1HY","KLX 150 S",23600000],["6V7","KLX 150 SE",26700000],["3XL","KLX 150BF SE EXTREME",25600000]],"KLX 230":[["4DS","KLX 230",25600000],["4DT","KLX 230 SE",30400000]],"KLX 250":[["01D","KLX 250",43600000]],"KSR 110":[["2LC","KSR 110",22300000]],"VERSYS X 250":[["4AH","VERSYS X 250",39400000],["3TJ","VERSYS X 250 TOURER",47400000]],"W 175":[["4AK","W 175 CAFE",25700000],["431","W 175 SE",24600000],["42L","W 175 STD",20600000],["59S","W 175 TR",21900000],["58W","W 175 TR SE",24200000]],"W 250":[["49A","W 250",48000000],["49B","W 250 SE",48900000]]},"2019":{"D-TRACKER":[["26R","D TRACKER 150",23200000],["3RX","D TRACKER SE 150 CC",25100000],["231","D TRACKER X",42400000]],"NINJA 250":[["59L","N NINJA 250 SE ABS",48300000],["4AI","NEW NINJA 250",41600000],["47Z","NINJA 250 SE NON ABS",40400000],["3WJ","NINJA 250 SL",23700000],["59P","NNINJA 250SE ABSMDP",50800000]],"Z125 PRO":[["49D","Z125 PRO",16900000],["49C","Z125 PRO SE",27100000]],"KLX 150":[["1HS","KLX 150",25300000],["3CV","KLX 150 BF",22700000],["0BX","KLX 150 BF SE",23200000],["1HY","KLX 150 S",22600000],["6V7","KLX 150 SE",25700000],["3XL","KLX 150BF SE EXTREME",24600000]],"KLX 230":[["4DS","KLX 230",24100000],["4DT","KLX 230 SE",28900000]],"KLX 250":[["01D","KLX 250",42100000]],"KSR 110":[["2LC","KSR 110",19300000]],"VERSYS X 250":[["4AH","VERSYS X 250",36400000],["3TJ","VERSYS X 250 TOURER",44400000]],"W 175":[["4AK","W 175 CAFE",24700000],["431","W 175 SE",23600000],["42L","W 175 STD",19600000],["59S","W 175 TR",20900000],["58W","W 175 TR SE",23200000]],"W 250":[["49A","W 250",45000000],["49B","W 250 SE",45900000]]},"2018":{"D-TRACKER":[["26R","D TRACKER 150",22200000],["3RX","D TRACKER SE 150 CC",24100000],["231","D TRACKER X",40900000]],"NINJA 250":[["59L","N NINJA 250 SE ABS",45300000],["4AI","NEW NINJA 250",38600000],["2AD","NEW NINJA 250SE+ABS",39400000],["097","NINJA 250 FI",30300000],["3U0","NINJA 250 LTD",34100000],["47Z","NINJA 250 SE NON ABS",37400000],["3WJ","NINJA 250 SL",22700000],["59P","NNINJA 250SE ABSMDP",47800000]],"Z125 PRO":[["49D","Z125 PRO",15900000],["49C","Z125 PRO SE",25600000]],"Z250":[["2VW","NEW Z250 ABS",29900000],["2VV","NEW Z250 NON ABS",25800000],["59V","Z 250SL ABS",21700000],["AEK","Z250SL",17800000]],"KLX 150":[["1HS","KLX 150",24300000],["3CV","KLX 150 BF",21700000],["0BX","KLX 150 BF SE",22200000],["1HY","KLX 150 S",21600000],["6V7","KLX 150 SE",24700000],["3XL","KLX 150BF SE EXTREME",23600000]],"KLX 250":[["01D","KLX 250",40600000]],"KSR 110":[["2LC","KSR 110",16300000]],"VERSYS X 250":[["4AH","VERSYS X 250",33400000],["3TJ","VERSYS X 250 TOURER",41400000]],"W 175":[["431","W 175 SE",22600000],["42L","W 175 STD",18600000]],"W 250":[["49A","W 250",42000000],["49B","W 250 SE",42900000]]}},"SUZUKI":{"2026":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",21500000]],"GSX-R150":[["4G3","GSX R150 KEYLESS",24600000]],"GSX-S150":[["59U","GSX-S 150 KEYLESS",21800000]]},"2025":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",18700000]],"GSX-R150":[["4G3","GSX R150 KEYLESS",21500000]],"GSX-S150":[["59U","GSX-S 150 KEYLESS",19000000]]},"2024":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",17300000]],"GSX-R150":[["4G3","GSX R150 KEYLESS",19900000]],"GSX-S150":[["59U","GSX-S 150 KEYLESS",17600000]]},"2023":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",16300000]],"GSX-R150":[["4G3","GSX R150 KEYLESS",18900000]],"GSX-S150":[["59U","GSX-S 150 KEYLESS",16600000]]},"2022":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",15300000]],"GSX-R150":[["49I","GSX - R150 SHUTTRDKE",17300000],["4G3","GSX R150 KEYLESS",17900000]],"GSX-S150":[["3O5","GSX S 150",15300000],["59U","GSX-S 150 KEYLESS",15600000]],"GSX 150 BANDIT":[["6F4","GSX 150 BANDIT",15000000]]},"2021":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",14300000]],"GSX-R150":[["49I","GSX - R150 SHUTTRDKE",16300000],["4G3","GSX R150 KEYLESS",16900000]],"GSX-S150":[["3O5","GSX S 150",14300000],["59U","GSX-S 150 KEYLESS",14600000]],"GSX 150 BANDIT":[["6F4","GSX 150 BANDIT",14000000]]},"2020":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",13300000]],"GSX-R150":[["49I","GSX - R150 SHUTTRDKE",15300000],["4G3","GSX R150 KEYLESS",15900000]],"GSX-S150":[["3O5","GSX S 150",13300000],["59U","GSX-S 150 KEYLESS",13600000]],"GSX 150 BANDIT":[["6F4","GSX 150 BANDIT",13000000]]},"2019":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",12300000]],"GSX-R150":[["49I","GSX - R150 SHUTTRDKE",14300000],["4G3","GSX R150 KEYLESS",14900000]],"GSX-S150":[["3O5","GSX S 150",12300000],["59U","GSX-S 150 KEYLESS",12600000]],"GSX 150 BANDIT":[["6F4","GSX 150 BANDIT",12000000]]},"2018":{"SATRIA F150":[["AEZ","ALL NEW SATRIA F150",11300000]],"GSX-R150":[["49I","GSX - R150 SHUTTRDKE",13300000],["4G3","GSX R150 KEYLESS",13900000]],"GSX-S150":[["3O5","GSX S 150",11300000],["59U","GSX-S 150 KEYLESS",11600000]],"GSX 150 BANDIT":[["6F4","GSX 150 BANDIT",11000000]]}},"VESPA PIAGGIO":{"2026":{"LX":[["ALS","NEW LX 150 I-GET",44600000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",54700000],["47P","PRIMAVERA IGET150ABS",52400000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",55700000],["59Q","SPRINT S150 IGET ABS",58000000],["ACX","SPRINT TECH",62600000]],"GTS":[["AT1","GTS CLASIC 150 I GET ABS",67000000],["59Y","GTS SPR 150 IGET ABS",67000000],["AT6","GTS SUPER SPORT 150 I GET ABS",71300000]]},"2025":{"LX":[["3SN","LX 125 IGET",42900000],["ALS","NEW LX 150 I-GET",42200000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",53200000],["47P","PRIMAVERA IGET150ABS",50900000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",53700000],["59Q","SPRINT S150 IGET ABS",56000000],["ACX","SPRINT TECH",59200000]],"GTS":[["AT1","GTS CLASIC 150 I GET ABS",63100000],["59Y","GTS SPR 150 IGET ABS",66300000],["AT6","GTS SUPER SPORT 150 I GET ABS",67200000]]},"2024":{"LX":[["3SN","LX 125 IGET",41900000]],"S 125":[["3UJ","S 125 CC I-GET",41900000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",51200000],["47P","PRIMAVERA IGET150ABS",48900000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",52600000],["59Q","SPRINT S150 IGET ABS",54900000]],"GTS":[["AT1","GTS CLASIC 150 I GET ABS",59300000],["59Y","GTS SPR 150 IGET ABS",62000000],["AT6","GTS SUPER SPORT 150 I GET ABS",63100000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",38700000],["3YV","MEDLEY 150ABS S IGET",47200000]]},"2023":{"LX":[["3SN","LX 125 IGET",39500000]],"S 125":[["3UJ","S 125 CC I-GET",39500000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",48400000],["47P","PRIMAVERA IGET150ABS",46200000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",49800000],["59Q","SPRINT S150 IGET ABS",52000000]],"GTS":[["AT1","GTS CLASIC 150 I GET ABS",56800000],["59Y","GTS SPR 150 IGET ABS",58400000],["AT6","GTS SUPER SPORT 150 I GET ABS",60600000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",36200000],["3YV","MEDLEY 150ABS S IGET",44700000]]},"2022":{"LX":[["3SN","LX 125 IGET",36800000]],"S 125":[["3UJ","S 125 CC I-GET",36900000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",46800000],["47P","PRIMAVERA IGET150ABS",44700000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",47600000],["59Q","SPRINT S150 IGET ABS",49700000]],"GTS":[["59Y","GTS SPR 150 IGET ABS",54300000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",33700000],["3YV","MEDLEY 150ABS S IGET",42200000]]},"2021":{"LX":[["3SN","LX 125 IGET",35800000]],"S 125":[["3UJ","S 125 CC I-GET",35900000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",45800000],["47P","PRIMAVERA IGET150ABS",43700000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",46600000],["59Q","SPRINT S150 IGET ABS",48700000]],"GTS":[["59Y","GTS SPR 150 IGET ABS",51800000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",31200000],["3YV","MEDLEY 150ABS S IGET",39700000]]},"2020":{"LX":[["3SN","LX 125 IGET",34800000]],"S 125":[["3UJ","S 125 CC I-GET",34900000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",44800000],["47P","PRIMAVERA IGET150ABS",42700000]],"SPRINT":[["47L","SPRINT 150 I-GET ABS",45600000],["59Q","SPRINT S150 IGET ABS",47700000]],"GTS":[["59Y","GTS SPR 150 IGET ABS",49300000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",28700000],["3YV","MEDLEY 150ABS S IGET",37200000]]},"2019":{"LX":[["3SN","LX 125 IGET",31800000],["59T","LX125 IGET MSTRPIECE",28000000]],"S 125":[["3UJ","S 125 CC I-GET",31900000],["59R","S125 IGET MSTRPIECE",28600000]],"PRIMAVERA":[["4O9","N PRIMAVERA S150 ABS",41800000],["AF0","PRIMAVERA 150 I GET MASTERPIECE",32800000],["3VE","PRIMAVERA I-GET 150",27200000],["47P","PRIMAVERA IGET150ABS",39700000]],"SPRINT":[["3TP","SPRINT 150 3V I-GET",26200000],["47L","SPRINT 150 I-GET ABS",42600000],["59Q","SPRINT S150 IGET ABS",44700000],["59X","SPRINT150IGET MSTRPC",34800000]],"GTS":[["41D","GTS I-GET 150",27800000],["3YU","GTS MASTERPIECE",36000000],["59Y","GTS SPR 150 IGET ABS",46300000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",25700000],["3YV","MEDLEY 150ABS S IGET",34200000]],"LXV":[["3IP","VESPA LXV 150 3V IE",27300000]]},"2018":{"LX":[["3SN","LX 125 IGET",28800000],["59T","LX125 IGET MSTRPIECE",25000000]],"S 125":[["3UJ","S 125 CC I-GET",28900000],["59R","S125 IGET MSTRPIECE",25600000]],"PRIMAVERA":[["AF0","PRIMAVERA 150 I GET MASTERPIECE",29800000],["3VE","PRIMAVERA I-GET 150",26400000],["47P","PRIMAVERA IGET150ABS",36700000]],"SPRINT":[["3TP","SPRINT 150 3V I-GET",23200000],["47L","SPRINT 150 I-GET ABS",39600000],["59X","SPRINT150IGET MSTRPC",31800000]],"GTS":[["41D","GTS I-GET 150",24800000],["3YU","GTS MASTERPIECE",33000000]],"MEDLEY":[["3Q1","MEDLEY 150 ABS I GET",22700000],["3YV","MEDLEY 150ABS S IGET",31200000]],"LXV":[["3IP","VESPA LXV 150 3V IE",26300000]]}}};
+</script>
+<script>
+// Rumus mengikuti Motor_.xls (sheet "Simulasi Angsuran" + "Pricelist")
+const CFG = {
+  admin: 1250000,          // dikunci
+  minPinjaman: 4000000,
+  stepPinjaman: 100000,
+  upping: 5,               // persen, OTR UPPING = OTR + 5%
+  ltvWarn: 0.80,           // notif
+  ltvMax: 0.85,            // kunci
+  nego: 2,                 // poin persen di atas ketentuan (rate tampil)
+  tenors: [11, 12, 17, 18, 23, 24, 36],
+};
+
+// Rate asuransi ZONA 2 (kolom U tabel tenor di Excel): <=12 | 13-24 | 25-36
+function rateAsuransi(t) {
+  return t <= 12 ? 0.018675 : t <= 24 ? 0.03465 : 0.048825;
+}
+
+// KETENTUAN RATE (EFF), dalam persen per tahun
+function rateKetentuan(t) {
+  return t <= 16 ? 41.5 : t <= 22 ? 39.5 : 39;
+}
+
+// Ketentuan fidusia berdasarkan pokok hutang
+function fidusiaTier(ph) {
+  return ph < 25000000 ? 115000 : ph <= 50000000 ? 140000 : 165000;
+}
+
+// Fidusia bergantung pada pokok hutang, sedangkan pokok hutang memuat fidusia.
+// Dicari tier terendah yang konsisten dengan pokok hutangnya.
+function fidusiaFor(base) {
+  for (const f of [115000, 140000, 165000]) {
+    if (fidusiaTier(base + f) === f) return f;
+  }
+  return 165000;
+}
+
+function compute(otr, pinjaman, tenor, nego) {
+  const admin = CFG.admin;
+  const asuransi = otr * rateAsuransi(tenor);                 // D11 = D3*C11
+  const fidusia = fidusiaFor(pinjaman + admin + asuransi);
+  const pokok = pinjaman + admin + fidusia + asuransi;        // D7
+  const ltv = pokok / otr;                                    // C7
+  const totalDp = otr - pinjaman;                             // D13
+  const dpNett = totalDp - (admin + fidusia + asuransi);      // D4
+  const rate = rateKetentuan(tenor) + (nego ? 0 : CFG.nego);  // % p.a.
+  const i = rate / 1200;
+  const pmt = pokok * i / (1 - Math.pow(1 + i, -tenor));      // PMT(rate/1200, tenor, -pokok)
+  const angsuran = Math.ceil(Math.round(pmt * 1e6) / 1e6 / 1000) * 1000; // ROUNDUP(...,-3)
+  return { otr, pinjaman, tenor, rate, admin, fidusia, asuransi, pokok, ltv,
+           totalDp, dpNett, dpNettPct: dpNett / otr, angsuran, ok: ltv <= CFG.ltvMax + 1e-9 };
+}
+
+// pinjaman maksimal (kelipatan 500rb, mulai 4jt) yang masih LTV <= 85%; null jika 4jt pun tidak lolos
+function maxPinjaman(otr, tenor) {
+  let best = null;
+  for (let p = CFG.minPinjaman; ; p += CFG.stepPinjaman) {
+    const r = compute(otr, p, tenor, true);
+    if (!r.ok) break;
+    best = p;
+    if (p > otr) break;
+  }
+  return best;
+}
+
+// OTR UPPING (sheet Simulasi: C21 = D3*5%, C22 = C21 + D3)
+function otrUpping(otr) {
+  return Math.round(otr * (100 + CFG.upping) / 100);
+}
+
+// KOMISI (FEE) per pokok hutang (sheet "KOMISI (FEE)"): [min, max, [tenor 11-16, 17-22, 23-36]]
+const KOMISI_ROWS = [
+  [4000001, 5000000, [100000, null, null]],
+  [5000001, 7500000, [200000, 250000, 250000]],
+  [7500001, 10000000, [250000, 350000, 400000]],
+  [10000001, 15000000, [450000, 550000, 650000]],
+  [15000001, 21000000, [550000, 700000, 800000]],
+  [21000001, 30000000, [750000, 1100000, 1300000]],
+  [30000001, 50000000, [950000, 1400000, 1800000]],
+];
+const KOMISI_NEGO_PCT = 80; // komisi nego rate = 80% dari komisi
+
+function komisiTier(t) { return t <= 16 ? 0 : t <= 22 ? 1 : 2; }
+
+// null jika pokok hutang di atas tabel (> Rp50 juta)
+function komisiFor(pokok, tenor) {
+  for (let i = 0; i < KOMISI_ROWS.length; i++) {
+    const [mn, mx, v] = KOMISI_ROWS[i];
+    const lo = i === 0 ? -Infinity : KOMISI_ROWS[i - 1][1];
+    if (pokok > lo && pokok <= mx) {
+      const n = v[komisiTier(tenor)];
+      return { mn, mx, normal: n, nego: n == null ? null : Math.round(n * KOMISI_NEGO_PCT / 100) };
+    }
+  }
+  return null;
+}
+
+if (typeof module !== 'undefined') module.exports = { CFG, compute, maxPinjaman, rateAsuransi, rateKetentuan, fidusiaTier, otrUpping, komisiFor, KOMISI_ROWS };
+
+</script>
+<script>
+const $ = id => document.getElementById(id);
+const el = { merk: $('merk'), tahun: $('tahun'), grup: $('grup'), detail: $('detail') };
+const fmt = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+const pct1 = n => (n * 100).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+const rateTxt = n => n.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '%';
+const collator = new Intl.Collator('id', { numeric: true, sensitivity: 'base' });
+
+/* ---------- State simulasi ---------- */
+const S = { base: null, otr: null, upping: false, name: '', P: null, tenor: 36, nego: false, blocked: false };
+const maxCache = {};
+const maxFor = (otr, t) => { const k = otr + '|' + t; return k in maxCache ? maxCache[k] : (maxCache[k] = maxPinjaman(otr, t)); };
+
+/* ---------- Pilih unit (merk > tahun > kelompok > detail) ---------- */
+function fill(select, placeholder, items) {
+  select.innerHTML = '';
+  const p = document.createElement('option'); p.value = ''; p.textContent = placeholder; select.appendChild(p);
+  items.forEach(it => { const o = document.createElement('option'); o.value = it.value; o.textContent = it.label; select.appendChild(o); });
+  select.disabled = items.length === 0;
+}
+function clearFrom(level) {
+  const order = ['tahun', 'grup', 'detail'];
+  const ph = { tahun: 'Pilih merk dulu', grup: 'Pilih tahun dulu', detail: 'Pilih kelompok dulu' };
+  order.slice(order.indexOf(level)).forEach(k => {
+    fill(el[k], ph[k], []);
+    $('h' + k[0].toUpperCase() + k.slice(1)).textContent = '';
+  });
+  resetUnit();
+}
+(function initSelects() {
+  const merks = Object.keys(DATA).sort(collator.compare);
+  fill(el.merk, 'Pilih merk', merks.map(m => ({ value: m, label: m })));
+  $('hMerk').textContent = merks.length + ' merk';
+  clearFrom('tahun');
+})();
+el.merk.addEventListener('change', () => {
+  clearFrom('tahun');
+  const m = el.merk.value; if (!m) return;
+  const years = Object.keys(DATA[m]).map(Number).sort((a, b) => b - a);
+  fill(el.tahun, 'Pilih tahun', years.map(y => ({ value: y, label: String(y) })));
+  $('hTahun').textContent = years.length + ' tahun';
+});
+el.tahun.addEventListener('change', () => {
+  clearFrom('grup');
+  const m = el.merk.value, t = el.tahun.value; if (!t) return;
+  const groups = Object.keys(DATA[m][t]).sort(collator.compare);
+  fill(el.grup, 'Pilih kelompok model', groups.map(g => ({ value: g, label: g + '  (' + DATA[m][t][g].length + ')' })));
+  $('hGrup').textContent = groups.length + ' kelompok';
+});
+el.grup.addEventListener('change', () => {
+  clearFrom('detail');
+  const m = el.merk.value, t = el.tahun.value, g = el.grup.value; if (!g) return;
+  const items = DATA[m][t][g];
+  fill(el.detail, 'Pilih model detail', items.map((it, i) => ({ value: i, label: it[1] })));
+  $('hDetail').textContent = items.length + ' model';
+});
+el.detail.addEventListener('change', () => {
+  const i = el.detail.value; if (i === '') { resetUnit(); return; }
+  const m = el.merk.value, t = el.tahun.value, g = el.grup.value;
+  const [kode, nama, otr] = DATA[m][t][g][Number(i)];
+  setUnit(otr, m + ' ' + t + ' › ' + nama);
+});
+
+/* ---------- Simulasi ---------- */
+function resetUnit() { S.base = null; S.otr = null; S.upping = false; S.name = ''; S.P = null; S.blocked = false; S.nego = false; render(); }
+
+function setUnit(otr, name) {
+  S.base = otr; S.name = name; S.nego = false; S.upping = false; S.tenor = 36;
+  applyOtr(false);
+}
+
+// Hitung OTR yang dipakai simulasi (dasar atau upping 5%), lalu rapikan tenor & pinjaman.
+function applyOtr(keepP) {
+  S.otr = S.upping ? otrUpping(S.base) : S.base;
+  S.blocked = false;
+  const feasible = t => maxFor(S.otr, t) !== null;
+  if (!feasible(S.tenor)) {
+    // tenor terpanjang yang masih lolos LTV pada pinjaman minimum
+    const t = [36, 24, 23, 18, 17, 12, 11].find(feasible);
+    if (!t) { S.blocked = true; S.P = null; render(); return; }
+    S.tenor = t;
+  }
+  const mx = maxFor(S.otr, S.tenor), st = CFG.stepPinjaman;
+  S.P = (keepP && S.P != null)
+    ? Math.min(mx, Math.max(CFG.minPinjaman, S.P))
+    : Math.min(mx, Math.max(CFG.minPinjaman, Math.round(mx * 0.5 / st) * st));
+  render();
+}
+
+/* ---------- Render ---------- */
+function setText(id, v) { $(id).textContent = v; }
+
+function render() {
+  const has = S.otr !== null;
+  const ok = has && !S.blocked;
+
+  const up = has && S.upping;
+  setText('otrVal', has ? fmt(S.otr) : 'Rp -');
+  $('otrVal').classList.toggle('up', up);
+  setText('lblOtr', up ? 'Harga OTR (Upping 5%)' : 'Harga OTR');
+  setText('lOtr', up ? 'Harga OTR (Upping 5%)' : 'Harga OTR');
+  setText('unitName', !has ? 'Pilih unit terlebih dahulu'
+    : up ? S.name + ' · OTR dasar ' + fmt(S.base) + ' + upping 5% ' + fmt(S.otr - S.base)
+         : S.name);
+  const ub = $('up');
+  ub.disabled = !has;
+  ub.className = 'upbtn' + (up ? ' on' : '');
+  ub.textContent = up ? 'Upping 5% aktif · Kembali ke OTR dasar' : '+ OTR Upping 5%';
+  $('sec2').classList.toggle('dim', !ok);
+
+  const notice = $('notice');
+  notice.className = 'notice'; notice.textContent = '';
+
+  if (!ok) {
+    setText('maxLine', S.blocked ? '' : '');
+    setText('loanVal', 'Rp -');
+    setText('maxLbl', 'Maks: -');
+    $('loan').disabled = true; $('minus').disabled = true; $('plus').disabled = true;
+    $('tenors').innerHTML = CFG.tenors.map(t => '<button class="tn" type="button" disabled><b>' + t + ' Bulan</b><small>-</small></button>').join('');
+    ['rOtr','rLoan','rAdmin','rFid','rAss','rPokok','rDpn','rTdp'].forEach(id => setText(id, has ? (id === 'rOtr' ? fmt(S.otr) : '-') : '-'));
+    setText('rDpPct', ''); $('rLtv').style.display = 'none';
+    renderKomisi(null, S.tenor);
+    setText('ang', 'Rp -'); setText('barAng', 'Rp -');
+    setText('sub', S.blocked ? 'Unit ini tidak bisa disimulasikan' : 'Pilih unit untuk memulai simulasi');
+    $('nego').disabled = true; $('nego').className = 'nego'; $('nego').textContent = 'Nego Rate';
+    $('bar').classList.remove('show');
+    if (S.blocked) {
+      notice.className = 'notice show lock';
+      notice.textContent = 'OTR unit ini terlalu rendah: pinjaman minimal ' + fmt(CFG.minPinjaman) + ' sudah melebihi batas LTV ' + Math.round(CFG.ltvMax * 100) + '%.';
+      $('sec2').classList.remove('dim');
+      $('sec2').style.opacity = 1;
+    } else { $('sec2').style.opacity = ''; }
+    return;
+  }
+  $('sec2').style.opacity = '';
+
+  const mx = maxFor(S.otr, S.tenor);
+  const r = compute(S.otr, S.P, S.tenor, S.nego);
+
+  // slider
+  const L = $('loan');
+  L.min = CFG.minPinjaman; L.max = mx; L.step = CFG.stepPinjaman;
+  if (Number(L.value) !== S.P) L.value = S.P;
+  L.disabled = mx === CFG.minPinjaman;
+  L.style.setProperty('--p', mx === CFG.minPinjaman ? '100%' : ((S.P - CFG.minPinjaman) / (mx - CFG.minPinjaman) * 100) + '%');
+  $('minus').disabled = S.P <= CFG.minPinjaman;
+  $('plus').disabled = S.P >= mx;
+  setText('loanVal', fmt(S.P));
+  setText('maxLbl', 'Maks: ' + fmt(mx));
+  setText('maxLine', 'Maks pinjaman (LTV ' + Math.round(CFG.ltvMax * 100) + '%) tenor ' + S.tenor + ' bln: ' + fmt(mx));
+
+  // notifikasi LTV
+  const ltvShown = Math.round(r.ltv * 1000) / 1000;
+  if (S.P >= mx) {
+    notice.className = 'notice show lock';
+    notice.textContent = 'Pinjaman dikunci di batas maksimal: LTV tidak boleh lebih dari ' + Math.round(CFG.ltvMax * 100) + '% (saat ini ' + pct1(r.ltv) + ').';
+  } else if (ltvShown >= CFG.ltvWarn) {
+    notice.className = 'notice show warn';
+    notice.textContent = 'Perhatian: LTV sudah ' + pct1(r.ltv) + '. Batas maksimal LTV ' + Math.round(CFG.ltvMax * 100) + '%.';
+  }
+
+  // tenor
+  $('tenors').innerHTML = CFG.tenors.map(t => {
+    const c = compute(S.otr, S.P, t, S.nego);
+    const on = t === S.tenor;
+    return '<button class="tn' + (on ? ' on' : '') + '" type="button" data-t="' + t + '"' + (c.ok ? '' : ' disabled') +
+      ' aria-pressed="' + on + '"><b>' + t + ' Bulan</b><small>' + (c.ok ? fmt(c.angsuran) : 'LTV > ' + Math.round(CFG.ltvMax * 100) + '%') + '</small></button>';
+  }).join('');
+
+  // panel
+  setText('ang', fmt(r.angsuran)); setText('barAng', fmt(r.angsuran));
+  const ket = rateKetentuan(S.tenor);
+  $('sub').innerHTML = 'Tenor ' + S.tenor + ' bulan &bull; Rate (eff) ' + rateTxt(r.rate) + ' p.a.' + (S.nego ? '<span class="badge">NEGO</span>' : '');
+  const nb = $('nego');
+  nb.disabled = false;
+  nb.className = 'nego' + (S.nego ? ' on' : '');
+  nb.textContent = S.nego ? 'Rate nego aktif (' + rateTxt(ket) + ') · Kembalikan' : 'Nego Rate';
+  setText('rOtr', fmt(r.otr)); setText('rLoan', fmt(r.pinjaman)); setText('rAdmin', fmt(r.admin));
+  setText('rFid', fmt(r.fidusia)); setText('rAss', fmt(r.asuransi));
+  setText('rPokok', fmt(r.pokok));
+  const lt = $('rLtv');
+  lt.style.display = ''; lt.textContent = 'LTV ' + pct1(r.ltv);
+  lt.className = 'ltv' + (S.P >= mx ? ' lock' : ltvShown >= CFG.ltvWarn ? ' warn' : '');
+  setText('rDpn', fmt(r.dpNett)); setText('rDpPct', '(' + pct1(r.dpNettPct) + ')');
+  setText('rTdp', fmt(r.totalDp));
+  renderKomisi(r.pokok, S.tenor);
+  $('bar').classList.add('show');
+}
+
+function renderKomisi(pokok, tenor) {
+  const tierTxt = tenor <= 16 ? 'Tenor 11-16 bln' : tenor <= 22 ? 'Tenor 17-22 bln' : 'Tenor 23-36 bln';
+  const k = pokok == null ? null : komisiFor(pokok, tenor);
+  $('kNormal').classList.toggle('on', pokok != null);
+  if (pokok == null) {
+    setText('kTag', '-'); setText('kNormalVal', '-');
+    setText('kNote', 'Pilih unit untuk melihat komisi.');
+    return;
+  }
+  setText('kTag', tierTxt);
+  if (!k) {
+    setText('kNormalVal', '-');
+    setText('kNote', 'Pokok hutang ' + fmt(pokok) + ' di atas Rp 50.000.000: belum ada di tabel komisi.');
+    return;
+  }
+  setText('kNormalVal', k.normal == null ? 'Tidak ada' : fmt(k.normal));
+  setText('kNote', k.normal == null
+    ? 'Pokok hutang s/d Rp 5.000.000 hanya ada komisi untuk tenor 11-16 bulan.'
+    : 'Pokok hutang ' + fmt(k.mn) + ' - ' + fmt(k.mx).replace('Rp ', ''));
+}
+
+/* ---------- Interaksi ---------- */
+$('loan').addEventListener('input', e => { S.P = Number(e.target.value); render(); });
+$('minus').addEventListener('click', () => { S.P = Math.max(CFG.minPinjaman, S.P - CFG.stepPinjaman); render(); });
+$('plus').addEventListener('click', () => { S.P = Math.min(maxFor(S.otr, S.tenor), S.P + CFG.stepPinjaman); render(); });
+$('tenors').addEventListener('click', e => {
+  const b = e.target.closest('button[data-t]'); if (!b || b.disabled) return;
+  S.tenor = Number(b.dataset.t); render();
+});
+$('nego').addEventListener('click', () => { S.nego = !S.nego; render(); });
+$('up').addEventListener('click', () => { if (S.base == null) return; S.upping = !S.upping; applyOtr(true); });
+$('barBtn').addEventListener('click', () => $('panel').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+render();
+
+/* ---------- Install (PWA) ---------- */
+let deferred = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('install').style.display = 'inline-block'; });
+$('install').addEventListener('click', async () => {
+  if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (_) {}
+  deferred = null; $('install').style.display = 'none';
+});
+window.addEventListener('appinstalled', () => { $('install').style.display = 'none'; });
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
