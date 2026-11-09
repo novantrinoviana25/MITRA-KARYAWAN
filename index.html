@@ -7,8 +7,8 @@
 <meta name="description" content="Simulasi angsuran dana tunai motor: pilih unit, atur pinjaman, pilih tenor.">
 <meta name="theme-color" content="#059669">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mitra Karyawan">
@@ -364,7 +364,7 @@ const CFG = {
   ltvWarn: 0.80,           // notif
   ltvMax: 0.85,            // kunci
   nego: 2,                 // poin persen di atas ketentuan (rate tampil)
-  tenors: [11, 12, 17, 18, 23, 24, 36],
+  tenors: [11, 12, 17, 18, 23, 24, 35, 36],
 };
 
 // Rate asuransi ZONA 2 (kolom U tabel tenor di Excel): <=12 | 13-24 | 25-36
@@ -532,7 +532,7 @@ function applyOtr(keepP) {
   const feasible = t => maxFor(S.otr, t) !== null;
   if (!feasible(S.tenor)) {
     // tenor terpanjang yang masih lolos LTV pada pinjaman minimum
-    const t = [36, 24, 23, 18, 17, 12, 11].find(feasible);
+    const t = [36, 35, 24, 23, 18, 17, 12, 11].find(feasible);
     if (!t) { S.blocked = true; S.P = null; render(); return; }
     S.tenor = t;
   }
