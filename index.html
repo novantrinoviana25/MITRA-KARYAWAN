@@ -195,6 +195,10 @@
   .upbtn.on { border-style: solid; background: #f97316; border-color: #f97316; color: #fff; }
   .upbtn:disabled { opacity: .45; cursor: not-allowed; }
   .val.up { color: #ea580c; }
+  .upchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+  .upchips .upl { font-size: 12px; color: #64748b; margin-right: 2px; }
+  .upnote { font-size: 12px; color: #c2410c; margin-top: 6px; min-height: 0; }
+  .upnote:empty { display: none; }
 
   /* Komisi (warna meriah) */
   .komisi {
@@ -421,9 +425,17 @@
     <div class="rescard" id="mResult" aria-live="polite">
       <div class="crumb" id="mCrumb"></div>
       <div class="mname" id="mName"></div>
-      <div class="olbl">Harga OTR</div>
+      <div class="olbl" id="mOlbl">Harga OTR</div>
       <div class="oval" id="mOtr"></div>
       <div class="kode" id="mKode"></div>
+      <div class="upchips" id="mUp" role="group" aria-label="Upping OTR">
+        <span class="upl">Upping OTR</span>
+        <button class="upbtn" type="button" data-u="3">3%</button>
+        <button class="upbtn" type="button" data-u="5">5%</button>
+        <button class="upbtn" type="button" data-u="8">8%</button>
+        <button class="upbtn" type="button" data-u="10">10%</button>
+      </div>
+      <div class="upnote" id="mUpNote"></div>
     </div>
     <div class="chips" id="mChips"></div>
 
@@ -957,7 +969,7 @@ $('barBtn').addEventListener('click', () => $('panel').scrollIntoView({ behavior
 render();
 
 /* ---------- Simulasi mobil ---------- */
-const M = { tipe: null, otr: null, P: null, tenor: 36, ri: 0, blocked: false, kom: 'NAD', kat: 'A' };
+const M = { tipe: null, otr: null, P: null, tenor: 36, ri: 0, blocked: false, kom: 'NAD', kat: 'A', base: null, up: 0 };
 const RATE_STEPS = Math.round((MB.rateMax - MB.rateMin) / MB.rateStep);
 const mRateAt = i => Math.round((MB.rateMax - i * MB.rateStep) * 100) / 100;
 const rate2 = n => n.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
@@ -967,8 +979,15 @@ const mMaxFor = (otr, t, rate, tipe, kat) => {
   return k in mMaxCache ? mMaxCache[k] : (mMaxCache[k] = mbMaxPinjaman(otr, t, rate, tipe, kat));
 };
 
-function setUnitM(otr, kat) {
-  M.otr = otr; M.kat = kat || 'A'; M.blocked = false;
+function showOtrM() {
+  const up = M.up > 0;
+  setText('mOtr', fmt(M.otr));
+  setText('mOlbl', up ? 'Harga OTR (Upping ' + M.up + '%)' : 'Harga OTR');
+  setText('mUpNote', up ? 'OTR dasar ' + fmt(M.base) + ' + upping ' + M.up + '% ' + fmt(M.otr - M.base) : '');
+  document.querySelectorAll('#mUp .upbtn').forEach(b => b.classList.toggle('on', Number(b.dataset.u) === M.up));
+}
+function setUnitM(otr, kat, keepP) {
+  M.otr = otr; M.kat = kat || 'A'; M.blocked = false; showOtrM();
   const rate = mRateAt(M.ri);
   const feasible = t => mMaxFor(otr, t, rate, M.tipe, M.kat) !== null;
   if (!feasible(M.tenor)) {
@@ -977,7 +996,7 @@ function setUnitM(otr, kat) {
     M.tenor = t;
   }
   const mx = mMaxFor(otr, M.tenor, rate, M.tipe, M.kat), st = MB.step;
-  M.P = Math.min(mx, Math.max(MB.minPinjaman, Math.round(mx * 0.5 / st) * st));
+  M.P = (keepP && M.P != null) ? Math.min(mx, Math.max(MB.minPinjaman, M.P)) : Math.min(mx, Math.max(MB.minPinjaman, Math.round(mx * 0.5 / st) * st));
   renderM();
 }
 function clampM() {
@@ -1106,7 +1125,7 @@ function mClear(level) {
   const ph = { merk: 'Pilih tipe dulu', tahun: 'Pilih merk dulu', grup: 'Pilih tahun dulu', detail: 'Pilih kelompok dulu' };
   order.slice(order.indexOf(level)).forEach(k => { fill(mEl[k], ph[k], []); mHint(k).textContent = ''; });
   $('mResult').classList.remove('show');
-  M.otr = null; M.P = null; M.blocked = false; renderM();
+  M.otr = null; M.base = null; M.up = 0; M.P = null; M.blocked = false; renderM();
 }
 (function initMobil() {
   const tipes = ['PASSENGER', 'COMMERCIAL'].filter(t => DATA_MOBIL[t]);
@@ -1151,10 +1170,15 @@ mEl.detail.addEventListener('change', () => {
   const [kode, nama, otr, kat] = DATA_MOBIL[t][m][y][g][Number(i)];
   setText('mCrumb', [TIPE_LABEL[t], m, y, g].join(' › '));
   setText('mName', nama);
-  setText('mOtr', fmt(otr));
+  M.base = otr; M.up = 0;
   setText('mKode', 'Kode model: ' + kode + ' - Kategori Kendaraan: ' + kat);
   box.classList.add('show');
-  setUnitM(otr, kat);
+  setUnitM(otr, kat, false);
+});
+$('mUp').addEventListener('click', e => {
+  const b = e.target.closest('button[data-u]'); if (!b || M.base == null) return;
+  const u = Number(b.dataset.u); M.up = M.up === u ? 0 : u;
+  setUnitM(Math.round(M.base * (100 + M.up) / 100), M.kat, true);
 });
 
 $('mRate').addEventListener('input', e => { M.ri = Number(e.target.value); clampM(); renderM(); });
