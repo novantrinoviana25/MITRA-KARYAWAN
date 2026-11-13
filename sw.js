@@ -1,6 +1,6 @@
 // Service worker: aplikasi tetap bisa dibuka tanpa internet.
 // Kalau data/tampilan diperbarui, naikkan angka VERSI supaya HP mengambil file baru.
-const VERSI = 'simulasi-motor-v11';
+const VERSI = 'simulasi-motor-v12';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
